@@ -86,7 +86,9 @@ public class KpiController {
 	@RequestMapping("VIEW") 
 	public String listRows(PortletRequest request,Model model){
 		Map<Integer,String> levelList = new HashMap<Integer,String>();
-		List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
+		 KpiLevelModel kpiLevelModel = new KpiLevelModel();
+		 kpiLevelModel.setActive(1);
+		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		for(KpiLevelModel level: levels){
 			levelList.put(level.getLevelId(),level.getDesc());
 		}
@@ -133,29 +135,34 @@ public class KpiController {
 	@RequestMapping("VIEW")
 	@RenderMapping(params="render=showDetail")
 	public String showDetail(PortletRequest request,Model model, @RequestParam("actionStatus") String actionStatus){
-	//	if(request.getParameter("message")!=null){
-			model.addAttribute("actionMessage",request.getParameter("message"));
-			model.addAttribute("actionMessageCode",request.getParameter("messageCode"));
-		//}
+		model.addAttribute("actionMessage",request.getParameter("message"));
+		model.addAttribute("actionMessageCode",request.getParameter("messageCode"));
+			
 		Paging pageSetting = new Paging();
 		pageSetting.setPageSize(50);	// set to 50 item
 		//
 		Map<Integer,String> levelList = new HashMap<Integer,String>();
-		List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
+		KpiLevelModel kpiLevelModel = new KpiLevelModel();
+		kpiLevelModel.setActive(1);
+		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		for(KpiLevelModel level: levels){
 			levelList.put(level.getLevelId(),level.getDesc());
 		}
 		model.addAttribute("levelList", levelList);
 		
 		Map<Integer,String> typeList = new HashMap<Integer,String>();
-		List<KpiTypeModel> types = service.searchKpiType(new KpiTypeModel());
+		KpiTypeModel kpiTypeModel = new KpiTypeModel();
+		kpiTypeModel.setActive("1");
+		List<KpiTypeModel> types = service.searchKpiType(kpiTypeModel);
 		for(KpiTypeModel type: types){
 			typeList.put(type.getTypeId(),type.getTypeName());
 		}
 		model.addAttribute("typeList", typeList);
 		
 		Map<Integer,String> groupList = new HashMap<Integer,String>();
-		List<KpiGroupModel> groups = service.searchKpiGroup(new KpiGroupModel());
+		KpiGroupModel kpiGroupModel = new KpiGroupModel();
+		kpiGroupModel.setActive("1");
+		List<KpiGroupModel> groups = service.searchKpiGroup(kpiGroupModel);
 		for(KpiGroupModel group: groups){
 			groupList.put(group.getGroupId(),group.getGroupName());
 		}
@@ -164,6 +171,7 @@ public class KpiController {
 		Map<Integer,String> strucList = new HashMap<Integer,String>();
 		KpiStrucModel kst = new KpiStrucModel();
 		kst.setPaging(pageSetting);
+		kst.setActive("1");
 		List<KpiStrucModel> strucs = service.searchKpiStruc(kst);
 		for(KpiStrucModel struc: strucs){
 			strucList.put(struc.getStrucId(),struc.getStrucName());
@@ -186,7 +194,9 @@ public class KpiController {
 		model.addAttribute("periodList", periodList);
 		
 		Map<Integer,String> uomList = new HashMap<Integer,String>();
-		List<KpiUomModel> uoms = service.searchKpiUom(new KpiUomModel());
+		KpiUomModel kpiUomModel = new KpiUomModel();
+		kpiUomModel.setActive("1");
+		List<KpiUomModel> uoms = service.searchKpiUom(kpiUomModel);
 		for(KpiUomModel uom: uoms){
 			uomList.put(uom.getUomId(),uom.getUomName());
 		}
@@ -278,12 +288,14 @@ public class KpiController {
 			@ModelAttribute("kpiListForm") KpiListForm kpiListForm,BindingResult result,Model model) { 
 		response.setRenderParameter("render", "listSearch");
 		response.setRenderParameter("keySearch", kpiListForm.getKeySearch());
+		response.setRenderParameter("keyListStatus", kpiListForm.getKeyListStatus());
 		response.setRenderParameter("level", String.valueOf(kpiListForm.getLevel()));
 	}
 	@RequestMapping("VIEW")
 	@RenderMapping(params = "render=listSearch")
 	public String RenderKeySearch(@RequestParam("keySearch") String keySearch
 			,@RequestParam("level") String levelId,Model model){
+			//00000 เพิ่ม Render Parameter ใส่ส่วนของ keyListStatus แล้ว SetActive ตาม Parameter ที่ได้รับ
 			Map<Integer,String> levelList = new HashMap<Integer,String>();
 			List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
 			for(KpiLevelModel level: levels){

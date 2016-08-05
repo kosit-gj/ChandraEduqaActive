@@ -1,11 +1,8 @@
 package th.ac.chandra.eduqa.portlet;
 
-//import java.sql.Date;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 //import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
 ///import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -30,6 +27,9 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.model.User;
+
 import th.ac.chandra.eduqa.constant.ServiceConstant;
 import th.ac.chandra.eduqa.form.ThresholdForm;
 import th.ac.chandra.eduqa.mapper.CustomObjectMapper;
@@ -39,9 +39,6 @@ import th.ac.chandra.eduqa.model.SysYearModel;
 import th.ac.chandra.eduqa.model.ThresholdModel;
 import th.ac.chandra.eduqa.service.EduqaService;
 import th.ac.chandra.eduqa.xstream.common.Paging;
-
-import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.User;
 
 @Controller("thresholdController")
 @RequestMapping("VIEW")
@@ -89,6 +86,7 @@ public class ThresholdController {
 		}
 		ThresholdModel thresholdModel = new ThresholdModel();
 		KpiLevelModel kpiLevelModel = new KpiLevelModel();
+		kpiLevelModel.setActive(1);
 		String keySearch = thresholdForm.getKeySearch();
 		Paging page = new Paging(); //default pageNo = 1
 		
@@ -96,12 +94,13 @@ public class ThresholdController {
 		KpiLevelModel fLevel = new KpiLevelModel();
 		fLevel = kpiLevels.get(0);
 		String fristLevel = fLevel.getLevelId().toString();
-		if(keySearch == null){
+		if(keySearch == null || keySearch.length() == 0){
 			thresholdModel.setKeySearch(fristLevel);
 		}else{
 			thresholdModel.setKeySearch(keySearch);
 		}
 		thresholdModel.setPaging(page);
+		thresholdModel.setActive("99");
 
 		List<ThresholdModel> thresholds = service.searchThreshold(thresholdModel);
 		model.addAttribute("thresholds", thresholds);
@@ -124,11 +123,14 @@ public class ThresholdController {
 		thresholdForm.getThresholdModel().setCreatedBy(user.getFullName());
 		thresholdForm.getThresholdModel().setUpdatedBy(user.getFullName());
 		String keySearch = thresholdForm.getKeySearch();
+		String keyListStatus = thresholdForm.getKeyListStatus();
+
 		//String pageNo = thresholdForm.getPageNo().toString();
 		//String pageSize = thresholdForm.getPageSize();
 		ResultService rs = service.saveThreshold(thresholdForm.getThresholdModel());
 		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("keySearch", keySearch);
+		response.setRenderParameter("keyListStatus", keyListStatus);
 		response.setRenderParameter("pageNoStr", "1");
 		response.setRenderParameter("pageSize", "20");
 		response.setRenderParameter("messageCode", rs.getMsgCode());
@@ -145,14 +147,17 @@ public class ThresholdController {
 		thresholdForm.getThresholdModel().setAcademicYear(getCurrentYear());
 		thresholdForm.getThresholdModel().setUpdatedBy(user.getFullName());
 		String keySearch = thresholdForm.getKeySearch();
+		String keyListStatus = thresholdForm.getKeyListStatus();
 		//String pageNo = thresholdForm.getPageNo().toString();
 		//String pageSize = thresholdForm.getPageSize();
 		String createStr = thresholdForm.getCreateDate();
+		
 		Timestamp timestamp = Timestamp.valueOf(createStr);
 		thresholdForm.getThresholdModel().setCreatedDate(timestamp);
 		ResultService  rs = service.updateThreshold(thresholdForm.getThresholdModel());
 		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("keySearch", keySearch);
+		response.setRenderParameter("keyListStatus", keyListStatus);
 		response.setRenderParameter("pageNoStr", "1");
 		response.setRenderParameter("pageSize", "20");		
 		response.setRenderParameter("messageCode", rs.getMsgCode());
@@ -181,8 +186,10 @@ public class ThresholdController {
 		String pageNo = "1";
 		String pageSize = thresholdForm.getPageSize();
 		String keySearch = thresholdForm.getKeySearch();
+		String keyListStatus = thresholdForm.getKeyListStatus();
 		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("keySearch", keySearch);
+		response.setRenderParameter("keyListStatus", keyListStatus);
 		response.setRenderParameter("pageNoStr", pageNo);
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", messageCode);
@@ -203,9 +210,11 @@ public class ThresholdController {
 		 * //model.addAttribute("thresholds",thresholds); //return n;
 		 */
 		String keySearch = thresholdForm.getKeySearch();
+		String keyListStatus = thresholdForm.getKeyListStatus();
 		String pageSize = thresholdForm.getPageSize();
 		response.setRenderParameter("render", "listSearch");
 		response.setRenderParameter("keySearch", keySearch);
+		response.setRenderParameter( "keyListStatus" , keyListStatus);
 		response.setRenderParameter("pageSize", pageSize);
 	}
 	
@@ -217,10 +226,12 @@ public class ThresholdController {
 		String pageNo = thresholdForm.getPageNo().toString();
 		String pageSize = thresholdForm.getPageSize();
 		String keySearch = thresholdForm.getKeySearch();
+		String keyListStatus = thresholdForm.getKeyListStatus();
 		String messageCode = "";
 		String messageDesc = "";
 		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("keySearch", keySearch);
+		response.setRenderParameter("keyListStatus", keyListStatus);
 		response.setRenderParameter("pageNoStr", pageNo);
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", messageDesc);
@@ -229,12 +240,16 @@ public class ThresholdController {
 
 	@RequestMapping("VIEW")
 	@RenderMapping(params = "render=listSearch")
-	public String RenderSearch(@RequestParam("keySearch") String keySearch,
-			@RequestParam("pageSize") int pageSize, Model model) {
+	public String RenderSearch(@RequestParam("keySearch") String keySearch,@RequestParam( "keyListStatus" ) String keyListStatus,
+		@RequestParam("pageSize") int pageSize, Model model) {
 		ThresholdModel thresholdModel = new ThresholdModel();
 		KpiLevelModel kpiLevelModel = new KpiLevelModel();
+		
+		thresholdModel.setKeySearch(keySearch);	
+		thresholdModel.setActive( keyListStatus);
+		
 		Paging page = new Paging(); //default pageNo = 1
-		thresholdModel.setKeySearch(keySearch);		
+	
 		thresholdModel.setPaging(page);
 		thresholdModel.getPaging().setPageSize(pageSize);
 		
@@ -246,6 +261,8 @@ public class ThresholdController {
 		model.addAttribute("PageCur", 1);
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("keySearch", keySearch);
+		model.addAttribute( "keyListStatus" , keyListStatus);
+		
 		return "master/Threshold";
 	}
 	
@@ -256,11 +273,14 @@ public class ThresholdController {
 			@RequestParam("pageSize") String pageSize,
 			@RequestParam("messageDesc") String messageDesc,
 			@RequestParam("messageCode") String messageCode, 
+			@RequestParam("keyListStatus") String keyListStatus, 
+			
 			Model model) {
 		ThresholdModel thresholdModel = new ThresholdModel();
 		KpiLevelModel kpiLevelModel = new KpiLevelModel();
 		Paging page = new Paging(Integer.parseInt(pageNoStr), 10, "ASC");
-		thresholdModel.setKeySearch(keySearch);		
+		thresholdModel.setKeySearch(keySearch);	
+		thresholdModel.setActive(keyListStatus);
 		thresholdModel.setPaging(page);
 		thresholdModel.getPaging().setPageSize(Integer.parseInt(pageSize));
 		
@@ -270,6 +290,7 @@ public class ThresholdController {
 		model.addAttribute("lastPage", service.getResultPage());
 		model.addAttribute("levels", levels);
 		model.addAttribute("keySearch", keySearch);
+		model.addAttribute( "keyListStatus" , keyListStatus);
 		model.addAttribute("PageCur", pageNoStr);
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("messageCode", messageCode);

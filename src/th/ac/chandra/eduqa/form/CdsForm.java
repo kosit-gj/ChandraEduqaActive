@@ -16,6 +16,7 @@ public class CdsForm extends CommonForm implements Serializable{
 	private CdsModel cdsModel;
 	private String createdDate;
 	private String pageSize = "10";
+	private String KeyListStatus;
 	
 	public CdsForm(CdsModel cdsModel) {
 		super();
@@ -42,6 +43,12 @@ public class CdsForm extends CommonForm implements Serializable{
 	}
 	public void setPageSize(String pageSize) {
 		this.pageSize = pageSize;
+	}
+	public String getKeyListStatus() {
+		return KeyListStatus;
+	}
+	public void setKeyListStatus(String keyListStatus) {
+		KeyListStatus = keyListStatus;
 	}
 
 }

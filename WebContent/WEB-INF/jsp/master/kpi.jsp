@@ -144,12 +144,11 @@
        			<form:select path="level" onchange="actFilter()" items="${levels}"/> 
        			<span>ค้นหาตัวบ่งชี้</span>
        			<form:input type="text" id="keySearch" placeholder="ค้นหาจากชื่อ" path="keySearch"/>
-
-            <select name='listStatus' id='listStatus' class="listStatus">
-            <option selected='selected' value='99'>ทั้งหมด</option>
-            <option value='1'>เปิดใช้งาน</option> 
-            <option value='0'>ปิดใช้งาน</option>
-            </select>
+	            <form:select name='listStatus' id='listStatus' class="listStatus" path="keyListStatus">
+		            <option selected='selected' value='99'>ทั้งหมด</option>
+		            <option value='1'>เปิดใช้งาน</option> 
+		            <option value='0'>ปิดใช้งาน</option>
+	            </form:select>
 
        			<img height="20" width="20" onClick="actFilter()"  src="<c:url value="/resources/images/search.png"/>">
        			<img height="18" width="18" onClick="actAdd(this)" src="<c:url value="/resources/images/add.png"/>">
@@ -168,6 +167,7 @@
 			       				<th>ชื่อตัวบ่งชี้</th>
 			       				<th>ประเภทเกณฑ์การประเมิน</th>
 			       				<th>ชนิดตัวบ่งชี้</th>
+			       				<th>สถานะ</th>
 			       				<th>แก้ไข</th>
 			       				<th>ลบ</th>
 		       				</tr>
@@ -179,7 +179,15 @@
 		                		<td>${chandraFn:nl2br(kpi.groupName)}</td>  
 			               	 	<td>${chandraFn:nl2br(kpi.kpiName)}</td>  
 			               	 	<td>${chandraFn:nl2br(kpi.criteriaTypeName)}</td> 
-			               	 	<td>${chandraFn:nl2br(kpi.typeName)}</td>  
+			               	 	<td>${chandraFn:nl2br(kpi.typeName)}</td> 
+			               	 	<td style="text-align: center;">                 
+		                          <c:if test="${kpi.active=='0'}"> 
+		                          	<img data-toggle="tooltip" data-placement="top" title="Tooltip on top" src="<c:url value="/resources/images/button-turn-off.jpg"/>" width="22" height="22" style="cursor: pointer;"> 
+		                          </c:if> 
+		                          <c:if test="${kpi.active=='1'}"> 
+		                         	<img data-toggle="tooltip" data-placement="top" title="Tooltip on top" src="<c:url value="/resources/images/button-turn-on.jpg"/>" width="22" height="22" style="cursor: pointer;"> 
+		                          </c:if>		
+		                        </td>
 			                	<td style="text-align: center;">
 			                		<img height="24" width="24"  onClick="actEdit(this)"  src="<c:url value="/resources/images/edited.png"/>">
 		       					</td>	

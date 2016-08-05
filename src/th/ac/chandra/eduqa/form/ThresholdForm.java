@@ -16,6 +16,7 @@ public class ThresholdForm extends CommonForm implements Serializable{
 	private ThresholdModel thresholdModel;
 	private String createDate;
 	private String pageSize = "10";
+	private String KeyListStatus;
 	
 	public String getPageSize() {
 		return pageSize;
@@ -44,5 +45,12 @@ public class ThresholdForm extends CommonForm implements Serializable{
 	public void setCreateDate(String createDate) {
 		this.createDate = createDate;
 	}
+	public String getKeyListStatus() {
+		return KeyListStatus;
+	}
+	public void setKeyListStatus(String keyListStatus) {
+		KeyListStatus = keyListStatus;
+	}
+	
 	
 }

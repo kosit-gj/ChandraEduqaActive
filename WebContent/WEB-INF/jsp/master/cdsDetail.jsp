@@ -34,6 +34,15 @@
     <link rel="stylesheet" href="<c:url value="/resources/css/common-element.css"/>" type="text/css"/>
    	<script src="<c:url value="/resources/js/confirm-master/jquery.confirm.min.js"/>"></script>
    	
+   	<style>
+		select.listStatus{
+		width:100px;
+		height:30px;
+		vertical-align: middle;
+		margin-bottom: 0px;
+		}
+	</style>
+   	
     <script type="text/javascript"> 
 	var portletBoxName = "cdsDetail";
 	var connModeNS = ["edit","save"];
@@ -62,6 +71,7 @@
     				$(this).prop("checked", true);
     			}
 			});
+    		$("#cdsId").val("");
     	}
     });
     //bind event
@@ -506,13 +516,15 @@
 	       		<div id="accordion">
 					<h3>ข้อมูลพื้นฐาน</h3>
 					<div id="cdsDetailDesc" class="accord_content">
+					<form:input type="hidden" id="keyListStatus" path="keyListStatus" />
 						<table id="cdsDataTable">
 							<thead>
 								<tr>
 									<!-- <td> <span style="font-weight:bold"> ข้อมูลพื้นฐาน </span> </td> -->
-									<td><form:input type="hidden" path="cdsModel.cdsId" /></td>
+									<td><form:input type="hidden" path="cdsModel.cdsId" id="cdsId"/></td>
 									<td><form:input type="hidden" path="cdsModel.createdBy" /></td>
 									<td><form:input type="hidden" path="cdsModel.createdDate" /></td>
+									
 								</tr>
 							</thead>
 							<tbody>
@@ -532,6 +544,16 @@
 								<tr>
 									<td>รหัสข้อมูลพื้นฐาน che :</td>
 									<td><form:input type="text" class="tinyText" path="cdsModel.cheCode" readonly="true"/></td>
+								</tr>
+								<tr>
+								
+									<td> สถานะ  : </td>
+									<td style='text-align: left'>
+									<form:radiobutton id="fActive" checked="checked" class="widt active"
+									path="CdsModel.active" value="1" name="active" /> เปิดใช้งาน
+									<form:radiobutton id="fNotActive" class="widt active" path="CdsModel.active"
+									value="0" name="active" /> ปิดใช้งาน
+									</td>
 								</tr>
 								
 								<!-- Hidden -->
@@ -630,7 +652,7 @@
 										<table id="queryAttribute">
 											<tr><td>คอลัมน์ผลลัพธ์ข้อมูลพื้นฐาน	</td><td><form:select id="valueField" class="ckSqlFlag" path="cdsModel.valueField"> <form:options items="${qValueList}" /></form:select></td></tr>
 											<tr><td>คอลัมน์สถาบัน </td><td><form:select id="uniField" class="ckSqlFlag" path="cdsModel.universityField"><form:options items="${qUniList}" /></form:select></td></tr>
-									/		<tr><td>คอลัมน์คณะ </td><td><form:select id="facultyField" class="ckSqlFlag" path="cdsModel.facultyField"><form:options items="${qFacultyList}" /></form:select></td></tr>
+											<tr><td>คอลัมน์คณะ </td><td><form:select id="facultyField" class="ckSqlFlag" path="cdsModel.facultyField"><form:options items="${qFacultyList}" /></form:select></td></tr>
 											<tr><td>คอลัมน์หลักสูตร	</td><td><form:select id="courseField" class="ckSqlFlag" path="cdsModel.courseField"><form:options items="${qCourseList}" /></form:select></td></tr>
 											<tr><td>คอลัมน์ข้อมูลสนับสนุน </td><td><form:select id="detailField" class="ckSqlFlag" path="cdsModel.detailField"><form:options items="${qDetailList}" /></form:select></td></tr>
 											<tr><td>คอลัมน์ปีปฏิทิน	</td><td><form:select id="yearField" class="ckSqlFlag" path="cdsModel.yearField"><form:options items="${qYearList}" /></form:select></td></tr>

@@ -25,6 +25,7 @@ public class KpiListForm extends CommonForm implements Serializable{
 	private String university;
 	private String faculty;
 	private String course;
+	private String keyListStatus;
 	
 	public KpiListForm() {
 		super();
@@ -85,5 +86,11 @@ public class KpiListForm extends CommonForm implements Serializable{
 	}
 	public void setCourse(String course) {
 		this.course = course;
+	}
+	public String getKeyListStatus() {
+		return keyListStatus;
+	}
+	public void setKeyListStatus(String keyListStatus) {
+		this.keyListStatus = keyListStatus;
 	}
 }

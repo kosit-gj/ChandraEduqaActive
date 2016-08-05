@@ -38,12 +38,21 @@
 	<script  src="<c:url value="/resources/bootstrap/js/bootstrap-typeahead.min.js"/>"></script>
 	<script src="<c:url value="/resources/js/confirm-master/jquery.confirm.min.js"/>"></script>
 	
+	<style>
+ 	 select.listStatus{
+ 		width:100px;
+  		height:30px;
+ 		vertical-align: middle;
+  		margin-bottom: 0px;
+ 		 }
+  	</style>
+	
 	<!-- Color Picker -->
 	<script src="<c:url value="/resources/colorpicker-master/js/evol.colorpicker.min.js"/>" type="text/javascript" charset="utf-8"></script>
 	<link href="<c:url value="/resources/colorpicker-master/css/evol.colorpicker.css"/>" rel="stylesheet" type="text/css">
 	
     <script type="text/javascript"> 
-   	  	var dialog,dialog2;
+   	  	var dialog,dialog2,gobalBenginTld,gobalEndTld,gobalTldName,gobalTldColor,gobalActive;
     	$( document ).ready(function() {
     		/* paging();
     		$('#numPage').val(${PageCur});
@@ -83,6 +92,7 @@
     	function actSearch(el){
     		$('#thresholdForm').attr("action","<%=formActionSearch%>");
     		$('#keySearch').val($('#textSearch').val());
+    		$('#keyListStatus').val($('#listStatus').val());
     		$('#thresholdForm').submit();
     	}
     	function actChangePageSize(){
@@ -106,18 +116,19 @@
    	 		renderDialog('#formActTld',1,'','');   	 		
    	 	}
    	 	function actEdit(el){
-   	 		var dataId = parseInt($(el).parent('td').parent('tr').children('tbody tr td:nth-child(8)').html());
-   	 		var dataDesc = [];
+   	 	var dataId = parseInt($(el).parent('td').parent('tr').children('tbody tr td:nth-child(9)').html());
+   		 var dataDesc = [];
    	 		dataDesc["begin"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(2)').html();
    	 		dataDesc["end"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(3)').html();
    	 		dataDesc["name"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(4)').html();
    	 		dataDesc["color"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(5)').children('div').html();
-   	 		dataDesc["createBy"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(12)').html();
-   	 		dataDesc["createDate"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(11)').html();
+   	 		dataDesc["createBy"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(13)').html();
+   	 		dataDesc["createDate"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(12)').html();
+   	 		dataDesc["active"] = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(14)').html();
    	 		renderDialog('#formActTld',2,dataId,dataDesc);
    	 	}
    	 	function actDelete(el){   	
-   	 		var dataId = parseInt($(el).parent('td').parent('tr').children('tbody tr td:nth-child(8)').html());
+   	 	var dataId = parseInt($(el).parent('td').parent('tr').children('tbody tr td:nth-child(9)').html());
 	    	var dataName = $(el).parent('td').parent('tr').children('tbody tr td:nth-child(4)').text();
 	   	 	$.confirm({
 		   	     text: "ยืนยันการลบระดับตัวบ่งชี้ \"".concat(dataName, "\""),
@@ -154,18 +165,31 @@
 	   	   	 		).css( "display", "block" ).fadeOut( 15000 );
    	 			}else{
    	 				$("#fTldLevel").val(parseInt($("#textSearch").val()));
+   	 				$("#keyListStatus").val($("#listStatus").val());
 	   	 			$('#thresholdForm').attr('action',"<%=formActionInsert%>");  
 	   	 			$('#keySearch').val($("#textSearch").val()); // ??
-		   	 		$('#thresholdForm').submit().trigger('reset');
+		   	 		$('#thresholdForm').submit();
 		   	 		$('.inputForm').val("");
    	 			}
    	 		}
    	 	}
    	 	function actSaveEdit(){
-	 		$('#thresholdForm').attr("action","<%=formActionEdit%>");
-	 		$('#thresholdForm').submit().trigger('reset');
-	 	}
-	 	function actCancel(el){
+	 	if($.trim(gobalBenginTld) == $.trim($("input#fBeginTld").val()) //ส่วนที่เพิ่ม
+	 		&& $.trim(gobalEndTld) == $.trim($("input#fEndTld").val())
+	 		&& $.trim(gobalTldName) == $.trim($("input#fTldName").val())
+	 		&& $.trim(gobalTldColor) == $.trim($("input#fTldColor").val())
+	 		&& $.trim(gobalActive) == $.trim($("input.active:checked").val())
+	 		){
+	 		actCancel();
+	 	
+	 	}else{ ///////
+   	 		$('#thresholdForm').attr("action","<%=formActionEdit%>");
+	 		$('#thresholdForm').submit();
+	 		}
+   	 	}
+	 	
+   	 	
+   	 	function actCancel(el){
 	  		//dialog.dialog( "close" );
 	  		$('.inputForm').val("");
 	  		$('#formActTld').slideToggle('slow');
@@ -188,11 +212,35 @@
 	 			$(d1).find('input[type=text]#fEndTld').val(dataDesc["end"]);
 	 			$(d1).find('input[type=text]#fTldName').val(dataDesc["name"]);
 	 			$(d1).find('input[type=text]#fTldColor').val($.trim(dataDesc["color"]));
+	 		
+	 			///ส่วนที่เพิ่ม////
+	 			gobalBenginTld = dataDesc["begin"];
+	 			gobalEndTld = dataDesc["end"];
+	 			gobalTldName = dataDesc["name"];
+	 			gobalTldColor = dataDesc["color"];
+	 			gobalActive = dataDesc["active"];
+	 			
+	 			
+	 			//ส่วนที่เพิ่ม////
+	 			if(dataDesc["active"]==0){
+					 $(d1).find('input[type=radio]#fNotActive').prop( "checked", true );
+					 $(d1).find('input[type=radio]#fActive').prop( "checked", false );
+				}else if(dataDesc["active"]==1){
+					 $(d1).find('input[type=radio]#fNotActive').prop( "checked", false );
+					 $(d1).find('input[type=radio]#fActive').prop( "checked", true );
+				}else{
+					 $(d1).find('input[type=radio]#fNotActive').prop( "checked", false );
+					 $(d1).find('input[type=radio]#fActive').prop( "checked", true );
+				 }
+	 			
+	 			////////////
+	 				 			
 	 		}
    	 		$(d1).find('span').html(head);
    	 		$(d1).find('input[type=hidden]#fTldId').val(dataId);
    	 		$(d1).find('input[type=hidden]#fTldCreateBy').val(dataDesc["createBy"]);
-   			$(d1).find('input[type=hidden]#fTldCreateDate').val(dataDesc["createDate"]);	
+   			$(d1).find('input[type=hidden]#fTldCreateDate').val(dataDesc["createDate"]);
+   			
    			$(d1).find('input[type=button].save').attr('onClick',event);
 
 		   	if ( $(d1).is(':visible')) {
@@ -236,7 +284,9 @@
             	(charCode != 8 || $(element).val().indexOf('.') != -1) &&
                 (charCode != 45 || $(element).val().indexOf('-') != -1) &&      // “-” CHECK MINUS, AND ONLY ONE.
                 (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
-                (charCode < 48 || charCode > 57))
+                (charCode < 48 || charCode > 57) &&
+                charCode != 8 && charCode != 46
+            )
                 return false;
 
             return true;
@@ -260,17 +310,19 @@
    			font-size:14px;
    		}   		
    		table.formActTld th:nth-child(1){ width:5%; }
-   		table.formActTld th:nth-child(2){ width:12%; } table.formActTld td:nth-child(2){ text-align: center;}
-   		table.formActTld th:nth-child(3){ width:12%; } table.formActTld td:nth-child(3){ text-align: center;}
-   		table.formActTld th:nth-child(4){ width:36%; }
+   		table.formActTld th:nth-child(2){ width:10%; } table.formActTld td:nth-child(2){ text-align: center;}
+   		table.formActTld th:nth-child(3){ width:10%; } table.formActTld td:nth-child(3){ text-align: center;}
+   		table.formActTld th:nth-child(4){ width:30%; }
    		table.formActTld th:nth-child(5){ width:15%; } table.formActTld td:nth-child(5){ text-align: center;}
    		table.formActTld th:nth-child(6){ width:10%; }
    		table.formActTld th:nth-child(7){ width:10%; }
-   		table.formActTld th:nth-child(8), table.formActTld td:nth-child(8){ width:0%; display:none;}
+   		table.formActTld th:nth-child(8){ width:10%; }
    		table.formActTld th:nth-child(9), table.formActTld td:nth-child(9){ width:0%; display:none;}
    		table.formActTld th:nth-child(10), table.formActTld td:nth-child(10){ width:0%; display:none;}
    		table.formActTld th:nth-child(11), table.formActTld td:nth-child(11){ width:0%; display:none;}
    		table.formActTld th:nth-child(12), table.formActTld td:nth-child(12){ width:0%; display:none;}
+     	table.formActTld th:nth-child(13), table.formActTld td:nth-child(13){ width:0%; display:none;}
+     	table.formActTld th:nth-child(14), table.formActTld td:nth-child(14){ width:0%; display:none;}
    		table.formActTld tbody td:nth-child(1){
    			text-align:center;$("#success-alert").alert('close');
    			border-color:#acacac;
@@ -328,11 +380,12 @@
 					<div style="text-align: center;">
 						<form:input type="hidden" id="pageNo" path="pageNo" value="${PageCur}"/>
 						<form:input type="hidden" id="PageSize" path="pageSize" />
-						<form:input type="hidden" id="keySearch" path="keySearch" />
+						<form:input type="hidden" id="keySearch" path="keySearch"/>
 						<form:input type="hidden" id="fTldId" path="thresholdModel.thresholdId" />
 						<form:input type="hidden" id="fTldLevel" path="thresholdModel.levelId"/>
 						<form:input type="hidden" id="fTldCreateBy" path="thresholdModel.createdBy" />
 						<form:input type="hidden" id="fTldCreateDate" path="createDate" />
+						<form:input type="hidden" id="keyListStatus" path="keyListStatus" />
 						
 						<table style="margin:auto" > 
 							<tr>
@@ -361,8 +414,20 @@
 									style="width:60px" readonly="true"/> 
 								</td>						
 							</tr>
+							
+							<tr >
+			               		 <td style='text-align: right'></td>
+			               		 <td style='text-align: left'>
+			                			<form:radiobutton id="fActive" checked="checked" class="widt active" path="thresholdModel.active" value="1" name="active" />
+			                			<div style ="margin-right:17px; display: inline;">  เปิดใช้งาน
+			               				 </div>
+			               				 <form:radiobutton id="fNotActive" class="widt active" path="thresholdModel.active" value="0" name="active" /> ปิดใช้งาน
+			             		 </td>
+			              </tr>
+								
+										
 						</table>
-						
+	 					
 						<label id="chInput"></label> <br/>								
 						<input type="button" class="save" value="บันทึก" onClick="actSaveInsert()" /> 
 						<input type="button" class="cancel" value="ยกเลิก" onClick="actCancel()" />
@@ -399,20 +464,49 @@
 							</c:otherwise>
 						</c:choose>						
 					</c:forEach>
+					
 				</select>
+				</div>
+				
+				<div>
+				<span>ค้นหาเกณฑ์แสดงผลประเมินระดับ : </span>
+				<select name='listStatus' id='listStatus' class="listStatus">
+				<c:choose>
+							 <c:when test="${keyListStatus=='0'}">
+	 							 <option value='99'>ทั้งหมด</option>
+								 <option value='1'>เปิดใช้งาน</option>
+								 <option selected='selected' value='0'>ปิดใช้งาน</option>
+				 		</c:when>
+	 						<c:when test="${keyListStatus=='1'}">
+	 							<option value='99'>ทั้งหมด </option>
+								<option selected='selected' value='1'>เปิดใช้งาน</option>
+						 		<option value='0'>ปิดใช้งาน</option>
+						 </c:when>
+	 					 <c:otherwise>
+	 							<option selected='selected' value='99'>ทั้งหมด </option>
+								<option value='1'>เปิดใช้งาน</option>
+	 							<option value='0'>ปิดใช้งาน</option>
+					 	</c:otherwise>
+					</c:choose>
+				</select>
+       			 
+       			 <img height="20" width="20" src="<c:url value="/resources/images/search.png"/>" onClick="actSearch(this)">
+				<img style="cursor: pointer;" height="18" width="18" onClick="actAdd(this)" src="<c:url value="/resources/images/add.png"/>">
 			</div>
 		
-			<!-- <div class="paging span6" align="right">
+		<!-- <div class="row-fluid" style="margin-top: 10px">	
+			<div class="paging span12" align="right">
 				<li style="display: inline-block;" onclick='goPrev()'>
-					<a style="cursor: pointer;"><u>&lt;&lt;</u></a>
+					<a style="cursor: pointer;"><u>&lt;&nbsp;</u></a>
 				</li>
-				<div id="buttonPage"> Generate from paging(). </div> 
+				<div class="buttonPage"> 
+					<button class="btnPag btnPagDummy" onClick="actSelectPage(this)"> 1 </button>
+				</div> 
 				<li style="display: inline-block;" onclick='goNext()'>
-					<a style="cursor: pointer;"><u>&gt;&gt;</u></a>
+					<a style="cursor: pointer;"><u>&nbsp;&gt;</u></a>
 				</li>
 				&nbsp&nbsp&nbsp&nbsp
 				<input type="hidden" id="numPage" style="width:60px"/>
-				<button onClick="actChangePageSize()">Go</button>
 				<span>จำนวนแถว: </span> 
 				<select id="pageSize" onchange="actChangePageSize()">
 	    			<option>10</option>
@@ -421,13 +515,13 @@
 	    			<option>40</option>
 	    			<option>50</option>
 	  			</select>
-			</div> -->			
-		</div>
+			</div>		
+		</div>  -->
 		
-		<div>
+	<!-- <div>
 			<span>ผลการประเมิน </span>
-			<img style="cursor: pointer;" height="18" width="18" onClick="actAdd(this)" src="<c:url value="/resources/images/add.png"/>">
-		</div>
+				<img style="cursor: pointer;" height="18" width="18" onClick="actAdd(this)" src="<c:url value="/resources/images/add.png"/>">
+		</div> -->	
 		
 		<div class="boxTable">
 			<table class="formActTld">
@@ -438,6 +532,7 @@
 						<th>คะแนนสิ้นสุด</th>						
 						<th>คำอธิบาย</th>
 						<th>สี</th>
+						<th>สถานะ</th>
 						<th>แก้ไข</th>
 						<th>ลบ</th>
 						<th>รหัส(ซ้อน)</th>
@@ -459,7 +554,18 @@
 									<div style="background-color:${tld.colorCode};width:70%;margin:auto;" >
 										${tld.colorCode} 
 									</div>
-								</td>							
+								</td>
+								
+								<td align="center">
+								<c:if test="${tld.active=='0'}">
+									<img data-toggle="tooltip" data-placement="top" title="Tooltip on top" src="<c:url value="/resources/images/button-turn-off.jpg"/>" width="22" height="22" style="cursor: pointer;">
+								</c:if>
+								<c:if test="${tld.active=='1'}">
+									<img data-toggle="tooltip" data-placement="top" title="Tooltip on top" src="<c:url value="/resources/images/button-turn-on.jpg"/>" width="22" height="22" style="cursor: pointer;">
+								</c:if>
+              				    </td>
+								
+															
 								<td align="center">
 									<img style="cursor: pointer;" height="18" width="18" onClick="actEdit(this)" src="<c:url value="/resources/images/edited.png"/>">
 								</td>
@@ -471,6 +577,7 @@
 								<td>${tld.levelId} }</td>
 								<td> <fmt:formatDate value="${tld.createdDate}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
 								<td> ${tld.createdBy} </td>
+								<td> ${tld.active} </td>
 							</tr> 
 						</c:forEach>
 					</c:if>

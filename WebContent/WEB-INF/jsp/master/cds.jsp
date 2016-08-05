@@ -42,6 +42,15 @@
     <script src="<c:url value="/resources/bootstrap/js/bootstrap.min.js"/>"></script>	
 	<script src="<c:url value="/resources/js/confirm-master/jquery.confirm.min.js"/>"></script>	
 	<link rel="stylesheet" href="<c:url value="/resources/css/common-element.css"/>" type="text/css"/>
+	
+	<style>
+	select.listStatus{
+		width:100px;
+		height:30px;
+		vertical-align: middle;
+		margin-bottom: 0px;
+	}
+	</style>
     
     <script type="text/javascript"> 
     var portletBoxName = "cdsList";
@@ -79,7 +88,7 @@
 	 		var dataId = parseInt($(el).parent('td').parent('tr').children('td:nth-child(1)').html());
 	 		$('#cdsForm #cdsId').val(dataId);
    	 		$('#cdsForm').attr("action","<%=formActionEdit%>");
-			$('#cdsForm').submit();	
+			$('#cdsForm').submit();
 	 	}
 	 	function actDelete(el){
 	 		var dataId = $(el).parent('td').parent('tr').children('td:nth-child(1)').html();
@@ -106,8 +115,10 @@
 	 	function actSearch(el){
 	 		var word = $("#"+portletBoxName+" #textSearch").val();
 	 		$("#"+portletBoxName+" form#cdsForm #keySearch").val(word);
-	 		$("#"+portletBoxName+" form#cdsForm").attr("action","<%=formActionSearch%>");
+	 		$('#KeyListStatus').val($('#listStatus').val());
+	 		$("#"+portletBoxName+" form#cdsForm").attr("action","<%=formActionSearch%>");	
 	 		$("#"+portletBoxName+" form#cdsForm").submit();
+	 		
 	 	}
    	 	function paging(){
 	   	 	if(${not empty listCds}){
@@ -182,12 +193,20 @@
 			padding: 1px 2px 2px 2px;
 		}
 		#cdsList table.datagrid tbody tr:nth-child(2n) td{ background-color:rgba(244,244,244,1); }
-		#cdsList table.datagrid th:nth-child(1), #cdsList table.datagrid td:nth-child(1){ width:0%; display: none; }
-		#cdsList table.datagrid th:nth-child(2){ width:40%; }
-		#cdsList table.datagrid th:nth-child(3){ width:30%; }
-		#cdsList table.datagrid th:nth-child(4){ width:10%; } #cdsList table.datagrid td:nth-child(4){ text-align: center; }
-		#cdsList table.datagrid th:nth-child(5){ width:10%; } #cdsList table.datagrid td:nth-child(5){ text-align: center; }
    		
+   		#cdsList table.tableGridTp th:nth-child(1){ width:5%; }
+		#cdsList table.tableGridTp th:nth-child(2){ width:35%; }
+		#cdsList table.tableGridTp th:nth-child(3){ width:15%; }
+		#cdsList table.tableGridTp th:nth-child(4){ width:15%; }
+		#cdsList table.tableGridTp th:nth-child(5){ width:10%; }
+		#cdsList table.tableGridTp th:nth-child(6){ width:10%; }
+		#cdsList table.tableGridTp th:nth-child(7), table.tableGridTp td:nth-child(7){ width:0%; display:none;}
+		#cdsList table.tableGridTp th:nth-child(8), table.tableGridTp td:nth-child(8){ width:0%; display:none;}
+		#cdsList table.tableGridTp th:nth-child(9), table.tableGridTp td:nth-child(9){ width:0%; display:none;}
+		#cdsList table.tableGridTp th:nth-child(10), table.tableGridTp td:nth-child(10){ width:0%; display:none;}
+		#cdsList table.tableGridTp th:nth-child(11), table.tableGridTp td:nth-child(11){ width:0%; display:none;}
+		#cdsList table.tableGridTp th:nth-child(12), table.tableGridTp td:nth-child(12){ width:0%; display:none;}
+	
    		#cdsList #dataPaging>div, #cdsList #dataPagingBottom>div{
    			display:inline-block;
    			margin: 0px;
@@ -216,7 +235,7 @@
    	</style>
   </head>
 
-  <body> 
+  <body>
   	<input id="messageMsg" type="hidden" value="${messageCode}" />
 	<c:if test="${not empty messageCode}">
 	<div id="msgAlert" style="display:none">
@@ -230,19 +249,42 @@
 			<form:form id="cdsForm" modelAttribute="cdsForm" method="post"
 				name="cdsForm" action=""
 				enctype="multipart/form-data">
-				<form:input type="hidden" id="pageNo" path="pageNo"
-					value="${pageNo}" />
+				<form:input type="hidden" id="pageNo" path="pageNo" value="${pageNo}" />
 				<form:input type="hidden" id="PageSize" path="pageSize" />
 				<form:input type="hidden" id="keySearch" path="keySearch" />
 				<form:input type="hidden" id="cdsId" path="cdsModel.cdsId" />
+				<form:input type="hidden" id="KeyListStatus" path="KeyListStatus" />
 			</form:form>
 		</div>
 		<div class="row" style="margin-bottom:6px;">
 			<div id="dataSearch" class="span6">
 				<!-- class="boxHeader" -->
-				<span>ค้นหาข้อมูลพื้นฐาน</span> <input type="text" id="textSearch"
+				
+				<span>ค้นหาข้อมูลพื้นฐาน </span> <input type="text" id="textSearch"
 					placeholder="ค้นหาจากชื่อ" />
-					<img height="20" width="20" src="<c:url value="/resources/images/search.png"/>" onClick="actSearch(this)">
+				
+					<select name='listStatus' id='listStatus' class="listStatus">
+					<c:choose>
+						<c:when test="${keyListStatus=='0'}">
+						<option value='99'>ทั้งหมด</option>
+						<option value='1'>เปิดใช้งาน</option>
+						<option selected='selected' value='0'>เปิดใช้งาน</option>
+					</c:when>
+					<c:when test="${keyListStatus=='1'}">
+						<option value='99'>ทั้งหมด</option>
+						<option selected='selected' value='1'>ปิดใช้งาน</option>
+						<option value='0'>ปิดใช้งาน</option>
+					</c:when>
+					<c:otherwise>
+						<option selected='selected'
+						value='99'>ทั้งหมด</option>
+						<option value='1'>เปิดใช้งาน</option>
+						<option value='0'>ปิดใช้งาน</option>
+					</c:otherwise>
+					</c:choose>
+					</select>
+					&nbsp;
+					<img height="20" width="20" src="<c:url value="/resources/images/search.png"/>" onClick="actSearch(this)"> &nbsp;
 					<img height="18" width="18" src="<c:url value="/resources/images/add.png"/>"  onClick="actAdd(this)">
 			</div>
 
@@ -277,26 +319,39 @@
 		<table class="tableGridLv hoverTable">
 			<thead>
 				<tr>
-					<th>รหัสข้อมูลพื้นฐาน</th>
-					<th>ชื่อข้อมูลพื้นฐาน</th>
-					<th>ระดับข้อมูลพื้นฐาน</th>
-					<th>แก้ไข</th>
-					<th>ลบ</th>
+					<th WIDTH="12%">รหัสข้อมูลพื้นฐาน</th>
+					<th WIDTH="30%">ชื่อข้อมูลพื้นฐาน</th>
+					<th WIDTH="28%">ระดับข้อมูลพื้นฐาน</th>
+					<th WIDTH="10%">สถานะ</th>
+					<th WIDTH="10%">แก้ไข</th>
+					<th WIDTH="10%">ลบ</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				<c:if test="${not empty listCds}">
 					<c:forEach items="${listCds}" var="cds" varStatus="loop">
 						<tr>
-							<td>${cds.cdsId}</td>
+							<td align="center">${cds.cdsId}</td>
 							<td>${chandraFn:nl2br(cds.cdsName)}</td>
 							<td>${chandraFn:nl2br(cds.levelDesc)}</td>
+							<td align="center">
+								
+								<c:if test="${cds.active=='0'}">
+								<img data-toggle="tooltip" data-placement="top" title="Tooltip on top" src="<c:url value="/resources/images/button-turn-off.jpg"/>" width="22" height="22" style="cursor: pointer;">
+								</c:if>
+								<c:if test="${cds.active=='1'}">
+								<img data-toggle="tooltip" data-placement="top" title="Tooltip on top" src="<c:url value="/resources/images/button-turn-on.jpg"/>" width="22" height="22" style="cursor: pointer;">
+								</c:if>
+								
+							</td>
 							<td style="text-align:center">
 								<img height="24" width="24" src="<c:url value="/resources/images/edited.png"/>" onClick="actEdit(this)" >
 							</td>
 							<td style="text-align:center">
 								<img height="24" width="24" src="<c:url value="/resources/images/delete.png"/>"  onClick="actDelete(this)" >
 							</td>
+							
 						</tr>
 					</c:forEach>
 				</c:if>
@@ -311,6 +366,7 @@
 	       			<input type="button" onclick="goNext();" value=">>"/>
 	       		</div>
        		</div> --%>
+       		
 		<div class="row-fluid" style="margin-top: 10px">
 			<div class="paging span12" align="right">
 				<li style="display: inline-block;" onclick='goPrev()'><a

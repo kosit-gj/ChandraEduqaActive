@@ -174,6 +174,7 @@ public class CdsController {
 		//CdsModel cds = service.findCdsById(1);
 		response.setRenderParameter("render", "displayDetail");
 		response.setRenderParameter("pageAction", "new");
+		//System.out.print("test1111111111111111111111111111");
 	}
 	@RequestMapping(params="action=doEdit") 
 	public void editDetail(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
@@ -283,15 +284,24 @@ public class CdsController {
 	public void actionSearch(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
 			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) { 
 		
+		
 		String keySearch=cdsForm.getKeySearch();
+		String keyListStatus = cdsForm.getKeyListStatus();
+		
+		response.setRenderParameter("keyListStatus", keyListStatus); 
 		response.setRenderParameter("render", "listSearch");
 		response.setRenderParameter("keySearch", keySearch);
+		
 	}
 	@RequestMapping("VIEW")
 	@RenderMapping(params = "render=listSearch")
-	public String RenderSearch(@RequestParam("keySearch") String keySearch,Model model){
+	public String RenderSearch(@RequestParam("keySearch") String keySearch,@RequestParam("keyListStatus")String keyListStatus,Model model){
+			
 			CdsModel CdsModel =new CdsModel ();
+			
+			CdsModel.setActive(keyListStatus);
 			CdsModel.setKeySearch(keySearch);
+			
 			Paging page = new Paging();  // default pageNo = 1
 			CdsModel.setPaging(page);
 			// convert Model -> form 
@@ -300,6 +310,8 @@ public class CdsController {
 			model.addAttribute("listCds",cdsList);
 			model.addAttribute("pageNo",1);
 			model.addAttribute("lastPage",rs.getResultPage());
+			model.addAttribute("keyListStatus", keyListStatus);
+			
 			return "master/cds";
 	}
 
@@ -343,7 +355,7 @@ public class CdsController {
 		// require checkMode
 		CdsModel cds = CdsForm.getCdsModel();
 		cds.setAcademicYear(getCurrentYear());		
-		
+		//System.out.print("test11111111111111111111111111122213333333333333333333");
 		ResultService rs = new ResultService();
 		if(cds.getCdsId()==null  ){
 			cds.setCreatedBy(user.getFullName());
