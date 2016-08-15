@@ -19,11 +19,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <!-- Bootstrap core CSS --> 
-    <%-- <link rel="stylesheet" href="<c:url value="/resources/bootstrap/css/bootstrap.min.css"/>" type="text/css"/>
-    <link rel="stylesheet" href="<c:url value="/resources/bootstrap/css/bootstrap-responsive.min.css"/>" type="text/css"/> 
-    <link rel="stylesheet" href="<c:url value="/resources/css/jquery-ui.min.css"/>"/>
-    <script  src="<c:url value="/resources/bootstrap/js/bootstrap-typeahead.min.js"/>"></script>--%>
     
     <script src="<c:url value="/resources/js/jquery-1.11.2.min.js"/>"></script> 
     <script  src="<c:url value="/resources/js/jquery-ui.min.js"/>"></script>    
@@ -70,9 +65,6 @@
     	function actSearch(el){
     		$('#kpiLevelForm').attr("action","<%=formActionSearch%>");
     		$('#keySearch').val($('#textSearch').val());
-
-    		//alert($('#listStatus').val());
-
     		$('#keyListStatus').val($('#listStatus').val());
 
     		$('#kpiLevelForm').submit();
@@ -113,7 +105,9 @@
 	   	 	$.confirm({
 		   	     text: "ยืนยันการลบระดับตัวบ่งชี้ \"".concat(dataName, "\""),
 		   	     title: "ลบระดับตัวบ่งชี้",
-		   	     confirm: function(button) {		   	    	
+		   	     confirm: function(button) {
+		   	    	$('#keyListStatus').val($('#listStatus').val());
+	   	 			$("#keySearch").val($("#textSearch").val());
 		   	 		$('#kpiLevelForm').attr("action","<%=formActionDelete%>");
 			 		$('#kpiLevelForm '+'#fLevelId').val(dataId);
 			 		$('#kpiLevelForm').submit();
@@ -133,6 +127,8 @@
    	 		if($.trim($('#fLevelDesc').val()) == ""){
    	 			$('label#ckInputText').css( "display", "block" ).fadeOut( 5000 );
    	 		}else{
+   	 			$('#keyListStatus').val($('#listStatus').val());
+   	 			$("#keySearch").val($("#textSearch").val());
 	   	 		$('#kpiLevelForm').attr('action',"<%=formActionInsert%>");   	 		
 	   	 		$('#kpiLevelForm').submit();
 	   	 		$('input:text#fLevelDesc').val('');
@@ -142,8 +138,10 @@
    	 		if(($.trim(levelName) == $.trim($("input#fLevelDesc").val())) && ($.trim(levelActive) == $.trim($("input#fLevelActive").val()))){
 	 			actCancel();
 	 		}else{
+	 			$('#keyListStatus').val($('#listStatus').val());
+   	 			$("#keySearch").val($("#textSearch").val());
 	 			$('#kpiLevelForm').attr("action","<%=formActionEdit%>");
-		 		$('#kpiLevelForm').submit().trigger('reset');
+		 		$('#kpiLevelForm').submit();
 		 		$('input:text#fLevelDesc').val('');
 		 		$('input:text#fLevelActive').val('');
 	 		}	 		

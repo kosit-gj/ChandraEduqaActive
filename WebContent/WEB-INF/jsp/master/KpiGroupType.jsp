@@ -107,7 +107,9 @@
 	   	 	$.confirm({
 		   	     text: "ยืนยันการลบประเภทตัวบ่งชี้ \"".concat(dataName, "\""),
 		   	     title: "ลบประเภทตัวบ่งชี้",
-		   	     confirm: function(button) {		   	    	
+		   	     confirm: function(button) {
+		   	    	$('#keyListStatus').val($('#listStatus').val());
+	   	 			$("#keySearch").val($("#textSearch").val());
 		   	 		$('#kpiGroupTypeForm').attr("action","<%=formActionDelete%>");
 			 		$('#kpiGroupTypeForm '+'#fGroupTypeId').val(dataId);
 			 		$('#kpiGroupTypeForm').submit();
@@ -127,6 +129,8 @@
    	 		if($.trim($('#fGroupTypeDesc').val()) == ""){
    	 			$('label#ckInputText').css( "display", "block" ).fadeOut( 5000 );
    	 		}else{
+   	 			$('#keyListStatus').val($('#listStatus').val());
+	 			$("#keySearch").val($("#textSearch").val());
 	   	 		$('#kpiGroupTypeForm').attr('action',"<%=formActionInsert%>");   	 		
 	   	 		$('#kpiGroupTypeForm').submit();
 	   	 		$('#fGroupTypeDesc').val('');
@@ -139,6 +143,8 @@
    	 			//alert(gobalActive);
    	 			actCancel();
    	 		}else{
+   	 			$('#keyListStatus').val($('#listStatus').val());
+	 			$("#keySearch").val($("#textSearch").val());
 		 		$('#kpiGroupTypeForm').attr("action","<%=formActionEdit%>");
 		 		$('#kpiGroupTypeForm').submit();
 		 		$('#fGroupTypeDesc').val('');

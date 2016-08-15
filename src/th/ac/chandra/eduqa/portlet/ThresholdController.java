@@ -49,9 +49,7 @@ public class ThresholdController {
 	@Autowired
 	@Qualifier("eduqaServiceWSImpl")
 	private EduqaService service;
-	
-	// ชั่วคราว	
-	//private Integer sysYear = 2558;
+
 	private Integer getCurrentYear(){
 		SysYearModel sysYearModel = new SysYearModel();
 		List<SysYearModel> sysYears = service.searchSysYear(sysYearModel);
@@ -62,9 +60,6 @@ public class ThresholdController {
 			return 9999;
 		}
 	}
-	
-	@Autowired
-	private CustomObjectMapper customObjectMapper;
 
 	@InitBinder
 	public void initBinder(PortletRequestDataBinder binder,
@@ -74,8 +69,8 @@ public class ThresholdController {
 				new ByteArrayMultipartFileEditor());
 	}
 
-	@RequestMapping("VIEW")
-	// first visit
+	// First visit //
+	@RequestMapping("VIEW")	
 	public String listDetail(PortletRequest request, Model model) {
 		ThresholdForm thresholdForm = null;
 		if (!model.containsAttribute("thresholdForm")) {
@@ -107,8 +102,9 @@ public class ThresholdController {
 		model.addAttribute("levels", kpiLevels);
 		model.addAttribute("firstLevel", fristLevel);
 		model.addAttribute("lastPage", service.getResultPage());
-		model.addAttribute("keySearch", keySearch);
 		model.addAttribute("PageCur", "1");
+		model.addAttribute("keySearch", keySearch);
+		model.addAttribute("keyListStatus", thresholdModel.getActive());
 		return "master/Threshold";
 	}
 
@@ -125,8 +121,6 @@ public class ThresholdController {
 		String keySearch = thresholdForm.getKeySearch();
 		String keyListStatus = thresholdForm.getKeyListStatus();
 
-		//String pageNo = thresholdForm.getPageNo().toString();
-		//String pageSize = thresholdForm.getPageSize();
 		ResultService rs = service.saveThreshold(thresholdForm.getThresholdModel());
 		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("keySearch", keySearch);
@@ -135,7 +129,6 @@ public class ThresholdController {
 		response.setRenderParameter("pageSize", "20");
 		response.setRenderParameter("messageCode", rs.getMsgCode());
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
-		//Render to "VIEW"
 	}
 	
 	@RequestMapping(params = "action=doEdit")
@@ -148,8 +141,6 @@ public class ThresholdController {
 		thresholdForm.getThresholdModel().setUpdatedBy(user.getFullName());
 		String keySearch = thresholdForm.getKeySearch();
 		String keyListStatus = thresholdForm.getKeyListStatus();
-		//String pageNo = thresholdForm.getPageNo().toString();
-		//String pageSize = thresholdForm.getPageSize();
 		String createStr = thresholdForm.getCreateDate();
 		
 		Timestamp timestamp = Timestamp.valueOf(createStr);
@@ -159,7 +150,7 @@ public class ThresholdController {
 		response.setRenderParameter("keySearch", keySearch);
 		response.setRenderParameter("keyListStatus", keyListStatus);
 		response.setRenderParameter("pageNoStr", "1");
-		response.setRenderParameter("pageSize", "20");		
+		response.setRenderParameter("pageSize", "20");
 		response.setRenderParameter("messageCode", rs.getMsgCode());
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
 	}
@@ -169,20 +160,15 @@ public class ThresholdController {
 			javax.portlet.ActionResponse response,
 			@ModelAttribute("thresholdForm") ThresholdForm thresholdForm,
 			BindingResult result, Model model) {
-		User user = (User) request.getAttribute(WebKeys.USER);
 		ThresholdModel thresholdModel = new ThresholdModel();
 		thresholdModel.setThresholdId(thresholdForm.getThresholdModel().getThresholdId());		
-		//service.deleteThreshold(thresholdModel);
 		String messageDesc ="";
 		String messageCode ="";
 		int recoedCount=service.deleteThreshold(thresholdModel);
 		if(recoedCount == -9){
-			//model.addAttribute(ServiceConstant.ERROR_MESSAGE_KEY, ServiceConstant.ERROR_CONSTRAINT_VIOLATION_MESSAGE_CODE);
 			messageDesc = ServiceConstant.ERROR_CONSTRAINT_VIOLATION_MESSAGE_CODE;
 			messageCode = "0";
 		}
-		//Render to list page.
-		//String pageNo = thresholdForm.getPageNo().toString();
 		String pageNo = "1";
 		String pageSize = thresholdForm.getPageSize();
 		String keySearch = thresholdForm.getKeySearch();
@@ -201,21 +187,13 @@ public class ThresholdController {
 			javax.portlet.ActionResponse response,
 			@ModelAttribute("thresholdForm") ThresholdForm thresholdForm,
 			BindingResult result, Model model) {
-		/*
-		 * User user = (User) request.getAttribute(WebKeys.USER);
-		 * thresholdForm.getThresholdModel().setAcademicYear(sysYear); keySearch =
-		 * "aa"; ThresholdModel thresholdModel =new ThresholdModel ();
-		 * thresholdModel.setKeySearch(keySearch); List<ThresholdModel> thresholds =
-		 * service.searchThreshold(thresholdModel);
-		 * //model.addAttribute("thresholds",thresholds); //return n;
-		 */
-		String keySearch = thresholdForm.getKeySearch();
-		String keyListStatus = thresholdForm.getKeyListStatus();
-		String pageSize = thresholdForm.getPageSize();
-		response.setRenderParameter("render", "listSearch");
-		response.setRenderParameter("keySearch", keySearch);
-		response.setRenderParameter( "keyListStatus" , keyListStatus);
-		response.setRenderParameter("pageSize", pageSize);
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("keySearch", thresholdForm.getKeySearch());
+		response.setRenderParameter("keyListStatus", thresholdForm.getKeyListStatus());
+		response.setRenderParameter("pageNoStr", thresholdForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", thresholdForm.getPageSize());
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("messageCode", "");
 	}
 	
 	@RequestMapping(params = "action=doListPage")
@@ -237,34 +215,6 @@ public class ThresholdController {
 		response.setRenderParameter("messageDesc", messageDesc);
 		response.setRenderParameter("messageCode", messageCode);
 	}
-
-	@RequestMapping("VIEW")
-	@RenderMapping(params = "render=listSearch")
-	public String RenderSearch(@RequestParam("keySearch") String keySearch,@RequestParam( "keyListStatus" ) String keyListStatus,
-		@RequestParam("pageSize") int pageSize, Model model) {
-		ThresholdModel thresholdModel = new ThresholdModel();
-		KpiLevelModel kpiLevelModel = new KpiLevelModel();
-		
-		thresholdModel.setKeySearch(keySearch);	
-		thresholdModel.setActive( keyListStatus);
-		
-		Paging page = new Paging(); //default pageNo = 1
-	
-		thresholdModel.setPaging(page);
-		thresholdModel.getPaging().setPageSize(pageSize);
-		
-		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
-		List<ThresholdModel> thresholds = service.searchThreshold(thresholdModel);
-		model.addAttribute("thresholds", thresholds);
-		model.addAttribute("levels", levels);
-		model.addAttribute("lastPage", service.getResultPage());
-		model.addAttribute("PageCur", 1);
-		model.addAttribute("pageSize", pageSize);
-		model.addAttribute("keySearch", keySearch);
-		model.addAttribute( "keyListStatus" , keyListStatus);
-		
-		return "master/Threshold";
-	}
 	
 	@RequestMapping("VIEW")
 	@RenderMapping(params = "render=listPage")
@@ -273,8 +223,7 @@ public class ThresholdController {
 			@RequestParam("pageSize") String pageSize,
 			@RequestParam("messageDesc") String messageDesc,
 			@RequestParam("messageCode") String messageCode, 
-			@RequestParam("keyListStatus") String keyListStatus, 
-			
+			@RequestParam("keyListStatus") String keyListStatus, 			
 			Model model) {
 		ThresholdModel thresholdModel = new ThresholdModel();
 		KpiLevelModel kpiLevelModel = new KpiLevelModel();
@@ -282,8 +231,7 @@ public class ThresholdController {
 		thresholdModel.setKeySearch(keySearch);	
 		thresholdModel.setActive(keyListStatus);
 		thresholdModel.setPaging(page);
-		thresholdModel.getPaging().setPageSize(Integer.parseInt(pageSize));
-		
+		thresholdModel.getPaging().setPageSize(Integer.parseInt(pageSize));		
 		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		List<ThresholdModel> thresholds = service.searchThreshold(thresholdModel);
 		model.addAttribute("thresholds", thresholds);
@@ -297,32 +245,5 @@ public class ThresholdController {
 		model.addAttribute("messageDesc", messageDesc);
 		return "master/Threshold";
 	}
-	
-	/*@RequestMapping("VIEW")
-	@RenderMapping(params = "render=actionList")
-	public String RenderInsert(@RequestParam("messageCode") String messageCode, 
-			@RequestParam("messageDesc") String messageDesc, Model model) {
-		ThresholdModel thresholdModel = new ThresholdModel();
-		Paging page = new Paging(); //default pageNo=1
-		thresholdModel.setPaging(page);
-		thresholdModel.getPaging().setPageSize(10);
-		List<ThresholdModel> thresholds = service.searchThreshold(thresholdModel);
-		model.addAttribute("thresholds", thresholds);
-		model.addAttribute("lastPage", service.getResultPage());
-		model.addAttribute("PageCur", 1);
-		model.addAttribute("messageCode", messageCode);
-		model.addAttribute("messageDesc", messageDesc);
-		return "master/Threshold";
-	}*/
-	/*
-	 * @ResourceMapping(value="getPlan")
-	 * 
-	 * @ResponseBody public void Echo(ResourceRequest request,ResourceResponse
-	 * response) throws IOException{ String id=request.getParameter("p1");
-	 * JSONObject json = JSONFactoryUtil.createJSONObject();
-	 * json.put("description",id);
-	 * 
-	 * System.out.println(json.toString());
-	 * response.getWriter().write(json.toString()); }
-	 */
+
 }

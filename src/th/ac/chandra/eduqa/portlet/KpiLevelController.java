@@ -1,20 +1,13 @@
 package th.ac.chandra.eduqa.portlet;
 
-import java.io.File;
-//import java.sql.Date;
 import java.sql.Timestamp;
-//import java.text.DateFormat;
 import java.text.ParseException;
-///import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 
 import org.apache.log4j.Logger;
-//import org.joda.time.DateTime;
-//import org.joda.time.format.DateTimeFormat;
-//import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -29,17 +22,16 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.model.User;
+
 import th.ac.chandra.eduqa.constant.ServiceConstant;
 import th.ac.chandra.eduqa.form.KpiLevelForm;
-import th.ac.chandra.eduqa.mapper.CustomObjectMapper;
 import th.ac.chandra.eduqa.mapper.ResultService;
 import th.ac.chandra.eduqa.model.KpiLevelModel;
 import th.ac.chandra.eduqa.model.SysYearModel;
 import th.ac.chandra.eduqa.service.EduqaService;
 import th.ac.chandra.eduqa.xstream.common.Paging;
-
-import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.User;
 
 @Controller("kpiLevelController")
 @RequestMapping("VIEW")
@@ -51,8 +43,6 @@ public class KpiLevelController {
 	@Qualifier("eduqaServiceWSImpl")
 	private EduqaService service;
 	
-	// ชั่วคราว	
-	//private Integer sysYear = 2558;
 	private Integer getCurrentYear(){
 		SysYearModel sysYearModel = new SysYearModel();
 		List<SysYearModel> sysYears = service.searchSysYear(sysYearModel);
@@ -63,9 +53,6 @@ public class KpiLevelController {
 			return 9999;
 		}
 	}
-	
-	@Autowired
-	private CustomObjectMapper customObjectMapper;
 
 	@InitBinder
 	public void initBinder(PortletRequestDataBinder binder,
@@ -75,8 +62,8 @@ public class KpiLevelController {
 				new ByteArrayMultipartFileEditor());
 	}
 
-	@RequestMapping("VIEW")
-	// first visit
+	// First visit //
+	@RequestMapping("VIEW")	
 	public String listDetail(PortletRequest request, Model model) {
 		KpiLevelForm kpiLevelForm = null;
 		if (!model.containsAttribute("kpiLevelForm")) {
@@ -86,17 +73,14 @@ public class KpiLevelController {
 			kpiLevelForm = (KpiLevelForm) model.asMap().get("kpiLevelForm");
 		}
 		KpiLevelModel kpiLevelModel = new KpiLevelModel();
-		String keySearch = kpiLevelForm.getKeySearch();
-		kpiLevelModel.setKeySearch(keySearch);
-
 		Paging page = new Paging(); //default pageNo = 1
 		kpiLevelModel.setPaging(page);
+		kpiLevelModel.setKeySearch("");
+		kpiLevelModel.setActive(99);
 		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		model.addAttribute("levels", levels);
 		model.addAttribute("lastPage", service.getResultPage());
 		model.addAttribute("PageCur", "1");
-		model.addAttribute("keyListStatus","99");
-		
 		return "master/KpiLevel";
 	}
 
@@ -107,10 +91,7 @@ public class KpiLevelController {
 			BindingResult result, Model model) {
 		User user = (User) request.getAttribute(WebKeys.USER);
 		kpiLevelForm.getKpiLevelModel().setLevelId(null);
-		kpiLevelForm.getKpiLevelModel().setAcademicYear(getCurrentYear());
-		
-		//System.out.print("Active here!!!!="+kpiLevelForm.getKpiLevelModel().getActive());
-		
+		kpiLevelForm.getKpiLevelModel().setAcademicYear(getCurrentYear());		
 		kpiLevelForm.getKpiLevelModel().setActive(kpiLevelForm.getKpiLevelModel().getActive());
 		kpiLevelForm.getKpiLevelModel().setCreatedBy(user.getFullName());
 		kpiLevelForm.getKpiLevelModel().setUpdatedBy(user.getFullName());
@@ -125,7 +106,7 @@ public class KpiLevelController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", rs.getMsgCode());
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
-		//Render to "VIEW"
+		response.setRenderParameter("keyListStatus", kpiLevelForm.getKeyListStatus().toString());
 	}
 	
 	@RequestMapping(params = "action=doEdit")
@@ -150,6 +131,7 @@ public class KpiLevelController {
 		response.setRenderParameter("pageSize", kpiLevelForm.getPageSize());
 		response.setRenderParameter("messageCode", rs.getMsgCode());
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
+		response.setRenderParameter("keyListStatus", kpiLevelForm.getKeyListStatus().toString());
 	}
 	
 	@RequestMapping(params = "action=doDelete")
@@ -160,12 +142,10 @@ public class KpiLevelController {
 		User user = (User) request.getAttribute(WebKeys.USER);
 		KpiLevelModel kpiLevelModel = new KpiLevelModel();
 		kpiLevelModel.setLevelId(kpiLevelForm.getKpiLevelModel().getLevelId());		
-		//service.deleteKpiLevel(kpiLevelModel);
 		String messageDesc ="";
 		String messageCode ="";
 		int recoedCount=service.deleteKpiLevel(kpiLevelModel);
 		if(recoedCount == -9){
-			//model.addAttribute(ServiceConstant.ERROR_MESSAGE_KEY, ServiceConstant.ERROR_CONSTRAINT_VIOLATION_MESSAGE_CODE);
 			messageDesc = ServiceConstant.ERROR_CONSTRAINT_VIOLATION_MESSAGE_CODE;
 			messageCode = "0";
 		}
@@ -179,6 +159,7 @@ public class KpiLevelController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", messageCode);
 		response.setRenderParameter("messageDesc", messageDesc);
+		response.setRenderParameter("keyListStatus", kpiLevelForm.getKeyListStatus().toString());
 	}
 
 	@RequestMapping(params = "action=doSearch")
@@ -186,21 +167,18 @@ public class KpiLevelController {
 			javax.portlet.ActionResponse response,
 			@ModelAttribute("kpiLevelForm") KpiLevelForm kpiLevelForm,
 			BindingResult result, Model model) {
-		/*
-		 * User user = (User) request.getAttribute(WebKeys.USER);
-		 * kpiLevelForm.getKpiLevelModel().setAcademicYear(sysYear); keySearch =
-		 * "aa"; KpiLevelModel kpiLevelModel =new KpiLevelModel ();
-		 * kpiLevelModel.setKeySearch(keySearch); List<KpiLevelModel> levels =
-		 * service.searchKpiLevel(kpiLevelModel);
-		 * //model.addAttribute("levels",levels); //return n;
-		 */
+
 		String keySearch = kpiLevelForm.getKeySearch();
 		String pageSize = kpiLevelForm.getPageSize();
 		Integer keyListStatus = kpiLevelForm.getKeyListStatus();
-		response.setRenderParameter("render", "listSearch");
+		String pageNo = kpiLevelForm.getPageNo().toString();
+		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("keySearch", keySearch);
-		response.setRenderParameter("keyListStatus", Integer.toString(keyListStatus));
+		response.setRenderParameter("pageNoStr", pageNo);
 		response.setRenderParameter("pageSize", pageSize);
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("keyListStatus", keyListStatus.toString());
 	}
 	
 	@RequestMapping(params = "action=doListPage")
@@ -217,6 +195,7 @@ public class KpiLevelController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", "");
 		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("keyListStatus", kpiLevelForm.getKeyListStatus().toString());
 	}
 	
 	@RequestMapping(params = "action=doPageSize")
@@ -232,27 +211,7 @@ public class KpiLevelController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", "");
 		response.setRenderParameter("messageCode", "");
-	}
-
-	@RequestMapping("VIEW")
-	@RenderMapping(params = "render=listSearch")
-	public String RenderSearch(@RequestParam("keySearch") String keySearch,@RequestParam("keyListStatus") Integer keyListStatus,
-			@RequestParam("pageSize") int pageSize, Model model) {
-		KpiLevelModel kpiLevelModel = new KpiLevelModel();
-		kpiLevelModel.setKeySearch(keySearch);
-		kpiLevelModel.setActive(keyListStatus);
-		System.out.println("keyListStatuskeyListStatuskeyListStatuskeyListStatus="+keyListStatus);
-		Paging page = new Paging(); //default pageNo = 1
-		kpiLevelModel.setPaging(page);
-		kpiLevelModel.getPaging().setPageSize(pageSize);
-		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
-		model.addAttribute("levels", levels);
-		model.addAttribute("lastPage", service.getResultPage());
-		model.addAttribute("PageCur", 1);
-		model.addAttribute("pageSize", pageSize);
-		model.addAttribute("keySearch", keySearch);
-		model.addAttribute("keyListStatus", keyListStatus);
-		return "master/KpiLevel";
+		response.setRenderParameter("keyListStatus", kpiLevelForm.getKeyListStatus().toString());
 	}
 	
 	@RequestMapping("VIEW")
@@ -261,13 +220,15 @@ public class KpiLevelController {
 			@RequestParam("pageNoStr") String pageNoStr,
 			@RequestParam("pageSize") int pageSize,
 			@RequestParam("messageDesc") String messageDesc,
-			@RequestParam("messageCode") String messageCode, 
+			@RequestParam("messageCode") String messageCode,
+			@RequestParam("keyListStatus") String keyListStatus,
 			Model model) {
 		KpiLevelModel kpiLevelModel = new KpiLevelModel();
 		kpiLevelModel.setKeySearch(keySearch);
 		Paging page = new Paging(Integer.parseInt(pageNoStr), 10, "ASC");
 		kpiLevelModel.setPaging(page);
 		kpiLevelModel.getPaging().setPageSize(pageSize);
+		kpiLevelModel.setActive(Integer.parseInt(keyListStatus));
 		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		model.addAttribute("levels", levels);
 		model.addAttribute("keySearch", keySearch);
@@ -276,36 +237,8 @@ public class KpiLevelController {
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("messageCode", messageCode);
 		model.addAttribute("messageDesc", messageDesc);
-		model.addAttribute("keyListStatus","99");
+		model.addAttribute("keyListStatus", keyListStatus);
 		return "master/KpiLevel";
 	}
-	
-	/*@RequestMapping("VIEW")
-	@RenderMapping(params = "render=actionList")
-	public String RenderInsert(@RequestParam("messageCode") String messageCode, 
-			@RequestParam("messageDesc") String messageDesc,
-			@RequestParam("pageNoStr") String pageNoStr, Model model) {
-		KpiLevelModel kpiLevelModel = new KpiLevelModel();
-		Paging page = new Paging(); //default pageNo=1
-		kpiLevelModel.setPaging(page);
-		kpiLevelModel.getPaging().setPageSize(10);
-		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
-		model.addAttribute("levels", levels);
-		model.addAttribute("lastPage", service.getResultPage());
-		model.addAttribute("PageCur", pageNoStr);
-		model.addAttribute("messageCode", messageCode);
-		model.addAttribute("messageDesc", messageDesc);
-		return "master/KpiLevel";
-	}*/
-	/*
-	 * @ResourceMapping(value="getPlan")
-	 * 
-	 * @ResponseBody public void Echo(ResourceRequest request,ResourceResponse
-	 * response) throws IOException{ String id=request.getParameter("p1");
-	 * JSONObject json = JSONFactoryUtil.createJSONObject();
-	 * json.put("description",id);
-	 * 
-	 * System.out.println(json.toString());
-	 * response.getWriter().write(json.toString()); }
-	 */
+
 }

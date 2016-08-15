@@ -109,7 +109,9 @@
 	   	 	$.confirm({
 		   	     text: "ยืนยันการลบหน่วยวัด\"".concat(dataName, "\""),
 		   	     title: "ลบหน่วยวัด",
-		   	     confirm: function(button) {		   	    	
+		   	     confirm: function(button) {
+		   	    	$('#keyListStatus').val($('#listStatus').val());
+	   	 			$("#keySearch").val($("#textSearch").val());
 		   	 		$('#kpiUomForm').attr("action","<%=formActionDelete%>");
 			 		$('#kpiUomForm '+'#fUomId').val(dataId);
 			 		$('#kpiUomForm').submit();
@@ -129,6 +131,8 @@
    	 		if($.trim($('#fUomName').val()) == ""){
    	 			$('label#ckInputText').css( "display", "block" ).fadeOut( 5000 );
    	 		}else{
+   	 			$('#keyListStatus').val($('#listStatus').val());
+	 			$("#keySearch").val($("#textSearch").val());
 	   	 		$('#kpiUomForm').attr('action',"<%=formActionInsert%>");   	 		
 	   	 		$('#kpiUomForm').submit().trigger('reset');
 	   	 		$('#fUomName').val("");
@@ -137,13 +141,13 @@
    	 	function actSaveEdit(){
    	 		if($.trim($('#fUomName').val()) == ""){
 	 			$('label#ckInputText').css( "display", "block" ).fadeOut( 5000 );
-	 		}else{
-	 			
+	 		}else{	 			
 	 			if(($.trim(gobalOumName) == $.trim($("input#fUomName").val())) && ($.trim(gobalActive) == $.trim($("input.active:checked").val()))){
 	 				actCancel();
 	 				
 	 			}else{
-	 			
+	 				$('#keyListStatus').val($('#listStatus').val());
+	   	 			$("#keySearch").val($("#textSearch").val());
 	 				$('#kpiUomForm').attr("action","<%=formActionEdit%>");
 			 		$('#kpiUomForm').submit();
 	 			}

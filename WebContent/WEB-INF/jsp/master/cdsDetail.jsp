@@ -513,10 +513,13 @@
 		</div>
 		</c:if>
   		<form:form  id="cdsForm" modelAttribute="cdsForm" method="post" class="form" name="cdsForm" action="" enctype="multipart/form-data">
+	       	<form:input type="hidden" id="keyListStatus" path="keyListStatus" />
+			<form:input type="hidden" id="keySearch" path="keySearch" />
+			<form:input type="hidden" id="pageNo" path="pageNo" />
+			<form:input type="hidden" id="PageSize" path="pageSize" />
 	       		<div id="accordion">
 					<h3>ข้อมูลพื้นฐาน</h3>
-					<div id="cdsDetailDesc" class="accord_content">
-					<form:input type="hidden" id="keyListStatus" path="keyListStatus" />
+					<div id="cdsDetailDesc" class="accord_content">					
 						<table id="cdsDataTable">
 							<thead>
 								<tr>

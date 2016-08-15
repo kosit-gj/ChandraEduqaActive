@@ -14,17 +14,16 @@
 <portlet:actionURL var="formActionDelete">
 	<portlet:param name="action" value="doDelete"/>
 </portlet:actionURL> 
-<portlet:actionURL var="formActionFilter">
-	<portlet:param name="action" value="doFilter"/>
-</portlet:actionURL> 
 <portlet:actionURL var="formActionSearch">
 	<portlet:param name="action" value="doSearch"/>
 </portlet:actionURL> 
 <portlet:actionURL var="formActionListPage">
 	<portlet:param name="action" value="doListPage"/>
 </portlet:actionURL> 
-<portlet:actionURL var="formActionPageSize"> <portlet:param name="action" value="doPageSize"/> </portlet:actionURL>
-<portlet:resourceURL var="getPlan" id="getPlan" ></portlet:resourceURL>
+<portlet:actionURL var="formActionPageSize"> 
+	<portlet:param name="action" value="doPageSize"/> 
+</portlet:actionURL>
+
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -86,21 +85,14 @@
             }
     	}
     	/* bind element event*/
-    	function actFilter(){
-        	$('#kpiStrucForm').attr("action","<%=formActionFilter%>");
-        	$('#keySearch').val($('#textSearch').val());
-        	$('#kpiStrucForm').submit();
-    	}
     	function actSearch(el){
     		$('#kpiStrucForm').attr("action","<%=formActionSearch%>");
+    		$("#fGroupId").val($("#filterGroup").val());
     		$('#keySearch').val($('#textSearch').val());
     		$('#keyListStatus').val($('#listStatus').val());
     		$('#kpiStrucForm').submit();
     	}
-        function changeKpiGroup(current){
-        	$("#fGroupId").val($(current).val());
-        	actFilter();
-        }
+        
     	function actChangePageSize(el){
     		var numPage = $('.numPage').val();
     		var sizePage = $(el).val();
@@ -137,7 +129,10 @@
 	   	 	$.confirm({
 		   	     text: "ยืนยันการลบองค์ประกอบ \"".concat(dataName, "\""),
 		   	     title: "ลบองค์ประกอบ",
-		   	     confirm: function(button) {		   	    	
+		   	     confirm: function(button) {
+		   	    	$("#keySearch").val($("#textSearch").val());
+		   	 		$("#keyListStatus").val($("#listStatus").val());
+		   	 		$("#fGroupId").val($("#filterGroup").val());
 		   	 		$('#kpiStrucForm').attr("action","<%=formActionDelete%>");
 			 		$('#kpiStrucForm '+'#fStrucId').val(dataId);
 			 		$('#kpiStrucForm').submit();
@@ -157,6 +152,9 @@
    	 		if($.trim($('#fStrucName').val()) == ""){
    	 			$('label#ckInputText').css( "display", "block" ).fadeOut( 5000 );
    	 		}else{
+	   	 		$("#keySearch").val($("#textSearch").val());
+	   	 		$("#keyListStatus").val($("#listStatus").val());
+	   	 		$("#fGroupId").val($("#filterGroup").val());
 	   	 		$('#kpiStrucForm').attr('action',"<%=formActionInsert%>");   	 		
 	   	 		$("#fGroupId").val($('#fGroupType').val());
 	   	 		$('#kpiStrucForm').submit();
@@ -170,6 +168,9 @@
    	 			 ){
    	 			actCancel();
    	 		}else{
+	   	 		$("#keySearch").val($("#textSearch").val());
+	   	 		$("#keyListStatus").val($("#listStatus").val());
+	   	 		$("#fGroupId").val($("#filterGroup").val());
 		 		$('#kpiStrucForm').attr("action","<%=formActionEdit%>");
 		 		$("#fGroupId").val($('#fGroupType').val());
 		 		$('#kpiStrucForm').submit();
@@ -221,18 +222,12 @@
 	   				$(d1).find('input[type=radio]#fActive').prop( "checked", true );
 	   			}
 	   			//check from database
-
-
-
 	 		}
    	 		$(d1).find('span').html(head);
    	 		$(d1).find('input[type=hidden]#fStrucId').val(dataId);
    	 		$(d1).find('input[type=hidden]#fStrucCreateBy').val(dataDesc["createBy"]);
    			$(d1).find('input[type=hidden]#fStrucCreateDate').val(dataDesc["createDate"]);	
    			$(d1).find('button.save').attr('onClick',event);
-
-   			
-
 
 		   	if ( $(d1).is(':visible')) {
 
@@ -368,11 +363,6 @@
 									</select>
 								</td>
 							</tr>
-
-							
-
-
-
 							<tr>
 								<td style="text-align: right">เกณฑ์องค์ประกอบ :</td>
 								<td style="text-align: left;"><c:forEach
@@ -384,8 +374,6 @@
 									</c:forEach>
 								</td>
 							</tr>
-
-
 							<tr >
 								<td style='text-align: right'></td>
 								<td style='text-align: left;'>
@@ -412,51 +400,41 @@
 		<div class="row-fluid">
 			<div class="span3">
 				<span>กลุ่มตัวบ่งชี้</span>
-				<select id="filterGroup" onchange="changeKpiGroup(this)" style="width:100px;">
+				<select id="filterGroup" style="width:100px;">
 					<c:forEach items="${groups}" var="group" varStatus="loop">
-						<option value="${group.groupId}">${group.groupShortName}</option>
+						<c:choose>
+							<c:when test="${group.groupId == groupId}">				   
+						   		<option value="${group.groupId}" selected="selected">${group.groupShortName}</option>	    			
+						   </c:when> 
+						   <c:otherwise>
+						   		<option value="${group.groupId}">${group.groupShortName}</option>
+						   </c:otherwise>
+						</c:choose>
 					</c:forEach>
 				</select>
 			</div>
 			<div class="span6">
 				<span>ค้นหาองค์ประกอบ : </span>
 				<input type="text" id="textSearch" value="${keySearch}"  placeholder="ค้นหาจากชื่อ" style="margin-bottom: 0px;"/>
-				<!--
-				<select name='listStatus' id='listStatus'  class="listStatus">
-
-				   		<option selected='selected' value='99'>ทั้งหมด</option>
-		    			<option value='1'>เปิดใช้งาน</option>
-		    			<option value='0'>ปิดใช้งาน</option>
-
-				</select>
-				-->
-				<select name='listStatus' id='listStatus'  class="listStatus">
-				
-				<c:choose>
-				   <c:when test="${keyListStatus=='0'}">
-					    <option value='99'>ทั้งหมด</option>
-		    			<option value='1'>เปิดใช้งาน</option>
-		    			<option selected='selected' value='0'>ปิดใช้งาน</option>
-				   </c:when>
-				   <c:when test="${keyListStatus=='1'}">
-				   
-				   		<option value='99'>ทั้งหมด</option>
-		    			<option selected='selected' value='1'>เปิดใช้งาน</option>
-		    			<option value='0'>ปิดใช้งาน</option>
-		    			
-				   </c:when> 
-				   <c:otherwise>
-				   		<option selected='selected' value='99'>ทั้งหมด</option>
-		    			<option value='1'>เปิดใช้งาน</option>
-		    			<option value='0'>ปิดใช้งาน</option>
-				   </c:otherwise>  
-				</c:choose>
-
-	    			
+				<select name='listStatus' id='listStatus'  class="listStatus">				
+					<c:choose>
+					   <c:when test="${keyListStatus=='0'}">
+						    <option value='99'>ทั้งหมด</option>
+			    			<option value='1'>เปิดใช้งาน</option>
+			    			<option selected='selected' value='0'>ปิดใช้งาน</option>
+					   </c:when>
+					   <c:when test="${keyListStatus=='1'}">				   
+					   		<option value='99'>ทั้งหมด</option>
+			    			<option selected='selected' value='1'>เปิดใช้งาน</option>
+			    			<option value='0'>ปิดใช้งาน</option>		    			
+					   </c:when> 
+					   <c:otherwise>
+					   		<option selected='selected' value='99'>ทั้งหมด</option>
+			    			<option value='1'>เปิดใช้งาน</option>
+			    			<option value='0'>ปิดใช้งาน</option>
+					   </c:otherwise>  
+					</c:choose>	    			
 	  			</select>
-
-
-
 					<img src="<c:url value="/resources/images/search.png"/>" width="20" height="20" onClick="actSearch(this)" style="cursor: pointer;">
 					<img src="<c:url value="/resources/images/add.png"/>" width="18" height="18" onClick="actAdd(this)" style="cursor: pointer;">	
 			</div>

@@ -294,7 +294,7 @@ public class KpiController {
 	@RequestMapping("VIEW")
 	@RenderMapping(params = "render=listSearch")
 	public String RenderKeySearch(@RequestParam("keySearch") String keySearch
-			,@RequestParam("level") String levelId,Model model){
+			,@RequestParam("level") String levelId,Model model,@RequestParam("keyListStatus") String keyListStatus){
 			//00000 เพิ่ม Render Parameter ใส่ส่วนของ keyListStatus แล้ว SetActive ตาม Parameter ที่ได้รับ
 			Map<Integer,String> levelList = new HashMap<Integer,String>();
 			List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
@@ -311,6 +311,7 @@ public class KpiController {
 			KpiModel KpiModel =new KpiModel();
 			KpiModel.setLevelId(Integer.parseInt(levelId));
 			KpiModel.setKeySearch(keySearch);
+			KpiModel.setActive(keyListStatus);
 			Paging page = new Paging();  // default pageNo = 1
 			page.setPageSize(1000);	//limit return result  1000 row
 			KpiModel.setPaging(page);
@@ -546,7 +547,7 @@ public class KpiController {
 	public void saveCriteria(ResourceRequest request,ResourceResponse response) 
 			throws IOException{
 		/*4 type 
-		1. ปริมาณ แปลงคะแนน -> qualitative_baseline 
+		1. ปริมาณ แปลงคะแนน -> qualitative_baseline
 		2. ปริมาณจากสูตร ?   -> none
 		3. ปริมาณ กำหนดเอง (ไม่มีแล้ว) -> none  
 		4. คุณภาพ เกณพ์รวม -> range_baseline 

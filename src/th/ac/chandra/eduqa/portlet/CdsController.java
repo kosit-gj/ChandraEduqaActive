@@ -2,20 +2,17 @@ package th.ac.chandra.eduqa.portlet;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.portlet.PortletContext;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -84,8 +81,8 @@ public class CdsController {
 			cdsForm = (CdsForm)model.asMap().get("cdsForm");
 		}
 		CdsModel cdsModel = new CdsModel();
-		String keySearch=cdsForm.getKeySearch();
-		cdsModel.setKeySearch(keySearch);
+		cdsModel.setKeySearch("");
+		cdsModel.setActive("99");
 		Paging page = new Paging();
 		page.setPageNo(1);
 		cdsModel.setPaging(page);
@@ -95,116 +92,140 @@ public class CdsController {
 		model.addAttribute("pageNo",1);
 		model.addAttribute("PageCur",1);
 		model.addAttribute("lastPage",rs.getResultPage());
-		
+		model.addAttribute("keySearch", cdsModel.getKeySearch());
+		model.addAttribute("keyListStatus", cdsModel.getActive());
 		return "master/cds";
 	}
 	
-	@RenderMapping( params="render=backToList")
-	public String showList(PortletRequest request,
-			@RequestParam("messageDesc") String messageDesc,
-			@RequestParam("messageCode") String messageCode, 
-			Model model){
-		CdsForm cdsForm=null;
-		if (!model.containsAttribute("cdsForm")) {
-			cdsForm = new CdsForm();
-			model.addAttribute("cdsForm",	cdsForm);
-		}else{
-			cdsForm = (CdsForm)model.asMap().get("cdsForm");
-		}
-		CdsModel cdsModel = new CdsModel();
-		String keySearch=cdsForm.getKeySearch();
-		cdsModel.setKeySearch(keySearch);
-		Paging page = new Paging();
-		page.setPageNo(1);
-		cdsModel.setPaging(page);
-		ResultService rs = service.searchCds(cdsModel);
-		List<CdsModel> cdsList = (List<CdsModel>) rs.getResultObjList();
-		model.addAttribute("listCds",cdsList);
-		model.addAttribute("pageNo",1);
-		model.addAttribute("PageCur",1);
-		model.addAttribute("lastPage",rs.getResultPage());
-		model.addAttribute("messageCode", messageCode);
-		model.addAttribute("messageDesc", messageDesc);
-		return "master/cds";
-	}
-	
-	@RequestMapping(params = "action=doPageSize")
-	public void actionPageSize(javax.portlet.ActionRequest request,
-			javax.portlet.ActionResponse response,
-			@ModelAttribute("cdsForm") CdsForm CdsForm,
-			BindingResult result, Model model) {
-		String pageSize = CdsForm.getPageSize();
-		String keySearch = CdsForm.getKeySearch();
-		response.setRenderParameter("render", "listPage_2");
-		response.setRenderParameter("keySearch", keySearch);
-		response.setRenderParameter("pageNoStr", "1");
-		response.setRenderParameter("pageSize", pageSize);
-		response.setRenderParameter("messageDesc", "");
-		response.setRenderParameter("messageCode", "");
-	}
 	@RequestMapping("VIEW")
-	@RenderMapping(params = "render=listPage_2")
-	public String RenderListPage(@RequestParam("keySearch") String keySearch,
-			@RequestParam("pageNoStr") String pageNoStr,
+	@RenderMapping(params = "render=listPage")
+	public String RenderListPage(@RequestParam("pageNoStr") String pageNoStr,
 			@RequestParam("pageSize") int pageSize,
 			@RequestParam("messageDesc") String messageDesc,
-			@RequestParam("messageCode") String messageCode, 
+			@RequestParam("messageCode") String messageCode,
+			@RequestParam("keySearch") String keySearch,
+			@RequestParam("keyListStatus") String keyListStatus,
 			Model model) {		
 		Paging page = new Paging(Integer.parseInt(pageNoStr), 10, "ASC");
-		CdsModel CdsModel =new CdsModel ();
-		CdsModel.setPaging(page);
-		CdsModel.getPaging().setPageSize(pageSize);
-		ResultService rs = service.searchCds(CdsModel);
+		CdsModel cdsModel =new CdsModel ();
+		cdsModel.setPaging(page);
+		cdsModel.getPaging().setPageSize(pageSize);
+		cdsModel.setKeySearch(keySearch);
+		cdsModel.setActive(keyListStatus);
+		ResultService rs = service.searchCds(cdsModel);
 		List<CdsModel> cdsList = (List<CdsModel>) rs.getResultObjList();
 		model.addAttribute("listCds", cdsList);
 		model.addAttribute("pageNo",pageNoStr);
 		model.addAttribute("PageCur", pageNoStr);
 		model.addAttribute("lastPage", rs.getResultPage());
 		model.addAttribute("keySearch", keySearch);
+		model.addAttribute("keyListStatus", cdsModel.getActive());
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("messageCode", messageCode);
 		model.addAttribute("messageDesc", messageDesc);
 		return "master/cds";
 	}
 	
+	@RequestMapping(params = "action=doSearch") 
+	public void actionSearch(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
+			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) {		
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());		
+	}
+	
+	@RequestMapping(params = "action=doPageSize")
+	public void actionPageSize(javax.portlet.ActionRequest request,
+			javax.portlet.ActionResponse response,
+			@ModelAttribute("cdsForm") CdsForm cdsForm,
+			BindingResult result, Model model) {
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
+	}
+	
+	@RequestMapping(params = "action=doListPage") 
+	public void actionListPage(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
+			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) { 
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
+	}
 	
 	@RequestMapping(params="action=doNew") 
 	public void newDetail(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
 			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model){
-		//CdsModel cds = service.findCdsById(1);
 		response.setRenderParameter("render", "displayDetail");
 		response.setRenderParameter("pageAction", "new");
-		//System.out.print("test1111111111111111111111111111");
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());	
 	}
+	
 	@RequestMapping(params="action=doEdit") 
 	public void editDetail(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
 			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model){
 		response.setRenderParameter("render", "displayDetail");
 		response.setRenderParameter("cdsId",String.valueOf( cdsForm.getCdsModel().getCdsId() ) ) ;
 		response.setRenderParameter("pageAction", "edit");
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());
 	}
+	
+	@RequestMapping(params = "action=doDelete")
+	public void actionDelete(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
+			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) { 
+		ResultService rs = service.deleteCds(cdsForm.getCdsModel() );
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("messageCode", rs.getMsgCode());
+		response.setRenderParameter("messageDesc", rs.getMsgDesc());
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
+	}
+	
+	
+	// ############################ Cds Detail ############################### //	
 	@RequestMapping("VIEW")
 	@RenderMapping(params="render=displayDetail")
 	public String displayDetail(PortletRequest request,Model model){
-		// level
+		
+		//Add level
 		Map<Integer,String> levelList = new HashMap<Integer,String>();
 		levelList.put(1,"สถาบัน");
 		levelList.put(2,"คณะ");
 		levelList.put(3,"หลักสูตร");
 		model.addAttribute("levelList", levelList);
 		
-		//con dbType
+		//Con dbType
 		Map<String,String> dbTypeList = new HashMap<String,String>();
 		dbTypeList.put("mysql","mysql");
 		dbTypeList.put("oracle","oracle");
 		dbTypeList.put("db2", "db2");
 		model.addAttribute("dbTypeList", dbTypeList);
-		// conn
+		
+		//Connection
 		DbConnModel connModel = new DbConnModel();
 		List<DbConnModel> conns = service.searchConn(connModel);
 		model.addAttribute("listConn", conns);
 		
-		// fieldList
+		//FieldList
 		HashMap<String,String> qValueList =  new HashMap<String,String>();
 		HashMap<String,String> qUniList =  new HashMap<String,String>();
 		HashMap<String,String> qFacultyList =  new HashMap<String,String>();
@@ -212,7 +233,8 @@ public class CdsController {
 		HashMap<String,String> qDetailList =  new HashMap<String,String>();
 		HashMap<String,String> qYearList =  new HashMap<String,String>();
 		HashMap<String,String> qMonthList =  new HashMap<String,String>();
-		//add default
+		
+		//Add default
 		qValueList.put("", "none");
 		qUniList.put("", "none");
 		qFacultyList.put("", "none");
@@ -228,14 +250,19 @@ public class CdsController {
 		}else{
 			cdsForm = (CdsForm)model.asMap().get("cdsForm");
 		}
-		// check mode
+		
+		// Check mode //
 		if(request.getParameter("cdsId")!=null && !request.getParameter("cdsId").equals("")){ // edit mode
 			Integer cdsId = Integer.parseInt(request.getParameter("cdsId"));
 			ResultService rs = service.findCdsById(cdsId);
 			CdsModel cds = (CdsModel) rs.getResultObj(); 
 			cdsForm.setCdsModel(cds);
+			cdsForm.setKeySearch(request.getParameter("keySearch"));
+			cdsForm.setKeyListStatus(request.getParameter("keyListStatus"));
+			// cdsForm.setPageNo(Integer.parseInt(request.getParameter("pageNoStr")));
+			cdsForm.setPageSize(request.getParameter("pageSize"));
 			
-			//set select fieldname to fieldList
+			//Set select fieldname to fieldList
 			if(cds.getValueField()!=null && !cds.getValueField().equals("")){ 
 				qValueList.put(cds.getValueField(),cds.getValueField() );
 			}
@@ -259,7 +286,6 @@ public class CdsController {
 			}
 		}
 		model.addAttribute("cdsForm",	cdsForm);
-		// field list 
 		model.addAttribute("qValueList",qValueList);
 		model.addAttribute("qUniList",qUniList);
 		model.addAttribute("qFacultyList",qFacultyList);
@@ -267,95 +293,54 @@ public class CdsController {
 		model.addAttribute("qDetailList",qDetailList);
 		model.addAttribute("qYearList",qYearList);
 		model.addAttribute("qMonthList",qMonthList);
-		model.addAttribute("pageAction", request.getParameter("pageAction"));
-		
+		model.addAttribute("pageAction", request.getParameter("pageAction"));		
 		return "master/cdsDetail";
 	}
 	
-	@RequestMapping(params = "action=doDelete")
-	public void actionDelete(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
-			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) { 
-			ResultService rs = service.deleteCds(cdsForm.getCdsModel() );
-			response.setRenderParameter("render", "backToList");
-			response.setRenderParameter("messageCode", rs.getMsgCode());
-			response.setRenderParameter("messageDesc", rs.getMsgDesc());
-	}
-	@RequestMapping(params = "action=doSearch") 
-	public void actionSearch(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
-			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) { 
-		
-		
-		String keySearch=cdsForm.getKeySearch();
-		String keyListStatus = cdsForm.getKeyListStatus();
-		
-		response.setRenderParameter("keyListStatus", keyListStatus); 
-		response.setRenderParameter("render", "listSearch");
-		response.setRenderParameter("keySearch", keySearch);
-		
-	}
-	@RequestMapping("VIEW")
-	@RenderMapping(params = "render=listSearch")
-	public String RenderSearch(@RequestParam("keySearch") String keySearch,@RequestParam("keyListStatus")String keyListStatus,Model model){
-			
-			CdsModel CdsModel =new CdsModel ();
-			
-			CdsModel.setActive(keyListStatus);
-			CdsModel.setKeySearch(keySearch);
-			
-			Paging page = new Paging();  // default pageNo = 1
-			CdsModel.setPaging(page);
-			// convert Model -> form 
-			ResultService rs = service.searchCds(CdsModel);
-			List<CdsModel> cdsList = (List<CdsModel>) rs.getResultObjList();
-			model.addAttribute("listCds",cdsList);
-			model.addAttribute("pageNo",1);
-			model.addAttribute("lastPage",rs.getResultPage());
-			model.addAttribute("keyListStatus", keyListStatus);
-			
-			return "master/cds";
-	}
-
-	@RequestMapping(params = "action=doListPage") 
-	public void actionListPage(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
-			@ModelAttribute("cdsForm") CdsForm CdsForm,BindingResult result,Model model) { 
-		/*String pageNo = CdsForm.getPageNo().toString();
-		String keySearch = CdsForm.getKeySearch();
-		response.setRenderParameter("render", "listPage");
-		response.setRenderParameter("pageNoStr",pageNo);*/
-		
-		String pageNo = CdsForm.getPageNo().toString();
-		String pageSize = CdsForm.getPageSize();
-		String keySearch = CdsForm.getKeySearch();
-		response.setRenderParameter("render", "listPage_2");
-		response.setRenderParameter("keySearch", keySearch);
-		response.setRenderParameter("pageNoStr", pageNo);
-		response.setRenderParameter("pageSize", pageSize);
-		response.setRenderParameter("messageDesc", "");
-		response.setRenderParameter("messageCode", "");
-	}
-	@RenderMapping(params = "render=listPage")
-	public String RenderListPage(@RequestParam("pageNoStr") String pageNoStr,Model model){
-		CdsModel CdsModel =new CdsModel ();
-		Paging page = new Paging(Integer.parseInt(pageNoStr),10,"ASC");
-		CdsModel.setPaging(page);
-		ResultService rs = service.searchCds(CdsModel);
+	@RenderMapping( params="render=backToList")
+	public String showList(PortletRequest request,
+			@RequestParam("messageDesc") String messageDesc,
+			@RequestParam("messageCode") String messageCode,
+			@RequestParam("pageNoStr") String pageNoStr,
+			@RequestParam("pageSize") String pageSize,
+			@RequestParam("keySearch") String keySearch,
+			@RequestParam("keyListStatus") String keyListStatus,
+			Model model){
+		CdsForm cdsForm=null;
+		if (!model.containsAttribute("cdsForm")) {
+			cdsForm = new CdsForm();
+			model.addAttribute("cdsForm",	cdsForm);
+		}else{
+			cdsForm = (CdsForm)model.asMap().get("cdsForm");
+		}
+		CdsModel cdsModel = new CdsModel();
+		cdsModel.setKeySearch(keySearch);
+		cdsModel.setActive(keyListStatus);
+		Paging page = new Paging();
+		page.setPageNo(1);
+		cdsModel.setPaging(page);
+		ResultService rs = service.searchCds(cdsModel);
 		List<CdsModel> cdsList = (List<CdsModel>) rs.getResultObjList();
-		model.addAttribute("listCds",cdsList);
+		model.addAttribute("listCds", cdsList);
 		model.addAttribute("pageNo",pageNoStr);
 		model.addAttribute("PageCur", pageNoStr);
-		model.addAttribute("lastPage",rs.getResultPage());
+		model.addAttribute("lastPage", rs.getResultPage());
+		model.addAttribute("keySearch", cdsModel.getKeySearch());
+		model.addAttribute("keyListStatus", cdsModel.getActive());
+		model.addAttribute("pageSize", pageSize);
+		model.addAttribute("messageCode", messageCode);
+		model.addAttribute("messageDesc", messageDesc);
+		
 		return "master/cds";
-	}
+	}	
 	
-	// detai
 	@RequestMapping(params = "action=doSave") 
 	public void SaveCds(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
-			@ModelAttribute("cdsForm") CdsForm CdsForm,BindingResult result,Model model) { 
-		User user = (User) request.getAttribute(WebKeys.USER);
-		// require checkMode
-		CdsModel cds = CdsForm.getCdsModel();
-		cds.setAcademicYear(getCurrentYear());		
-		//System.out.print("test11111111111111111111111111122213333333333333333333");
+			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) { 
+		User user = (User) request.getAttribute(WebKeys.USER);		
+		//Require checkMode
+		CdsModel cds = cdsForm.getCdsModel();
+		cds.setAcademicYear(getCurrentYear());
 		ResultService rs = new ResultService();
 		if(cds.getCdsId()==null  ){
 			cds.setCreatedBy(user.getFullName());
@@ -369,15 +354,25 @@ public class CdsController {
 		response.setRenderParameter("render", "backToList");
 		response.setRenderParameter("messageCode", rs.getMsgCode());
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
-	}
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
+	}	
 	
 	@RequestMapping(params = "action=doShowList") 
 	public void doShowList(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
-			@ModelAttribute("cdsForm") CdsForm CdsForm,BindingResult result,Model model) { 
-		//response.setRenderParameter("render", "backToList");
+			@ModelAttribute("cdsForm") CdsForm cdsForm,BindingResult result,Model model) { 
+		response.setRenderParameter("render", "backToList");
+		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("pageNoStr", "1");
+		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
+		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
+		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
 	}
 	
-	// ####################### conn ajax #######################
+	// ####################### connect via ajax ####################### //
 	@ResourceMapping(value="connGetList")
 	@ResponseBody 
 	public void connectionList(ResourceRequest request,ResourceResponse response) 
@@ -401,6 +396,7 @@ public class CdsController {
 		System.out.println(json.toString());
 		response.getWriter().write(json.toString());
 	}
+	
 	@ResourceMapping(value="connGetDetail")
 	@ResponseBody 
 	public void connectionDetail(ResourceRequest request,ResourceResponse response) 
@@ -428,6 +424,7 @@ public class CdsController {
 		System.out.println(json.toString());
 		response.getWriter().write(json.toString());
 	}
+	
 	@ResourceMapping(value="connSave")
 	@ResponseBody 
 	public void conectionSave(ResourceRequest request,ResourceResponse response) 
@@ -472,6 +469,7 @@ public class CdsController {
 		System.out.println(json.toString());
 		response.getWriter().write(json.toString());
 	}
+	
 	@ResourceMapping(value="connDelete")
 	@ResponseBody 
 	public void conectionDelete(ResourceRequest request,ResourceResponse response) 
@@ -490,7 +488,6 @@ public class CdsController {
 		System.out.println(json.toString());
 		response.getWriter().write(json.toString());
 	}
-	
 	
 	@ResourceMapping(value="exDataQuery")
 	@ResponseBody 

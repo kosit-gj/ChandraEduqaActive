@@ -1,6 +1,5 @@
 package th.ac.chandra.eduqa.portlet;
 
-//import java.sql.Date;
 import java.sql.Timestamp;
 //import java.text.DateFormat;
 import java.text.ParseException;
@@ -28,18 +27,16 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.model.User;
+
 import th.ac.chandra.eduqa.constant.ServiceConstant;
-import th.ac.chandra.eduqa.form.KpiGroupForm;
 import th.ac.chandra.eduqa.form.KpiTypeForm;
-import th.ac.chandra.eduqa.mapper.CustomObjectMapper;
 import th.ac.chandra.eduqa.mapper.ResultService;
 import th.ac.chandra.eduqa.model.KpiTypeModel;
 import th.ac.chandra.eduqa.model.SysYearModel;
 import th.ac.chandra.eduqa.service.EduqaService;
 import th.ac.chandra.eduqa.xstream.common.Paging;
-
-import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.User;
 
 @Controller("kpiTypeController")
 @RequestMapping("VIEW")
@@ -51,8 +48,6 @@ public class KpiTypeController {
 	@Qualifier("eduqaServiceWSImpl")
 	private EduqaService service;
 	
-	// ชั่วคราว	
-	//private Integer sysYear = 2558;
 	private Integer getCurrentYear(){
 		SysYearModel sysYearModel = new SysYearModel();
 		List<SysYearModel> sysYears = service.searchSysYear(sysYearModel);
@@ -63,9 +58,6 @@ public class KpiTypeController {
 			return 9999;
 		}
 	}
-	
-	@Autowired
-	private CustomObjectMapper customObjectMapper;
 
 	@InitBinder
 	public void initBinder(PortletRequestDataBinder binder,
@@ -75,8 +67,8 @@ public class KpiTypeController {
 				new ByteArrayMultipartFileEditor());
 	}
 
-	@RequestMapping("VIEW")
-	// first visit
+	// First visit //
+	@RequestMapping("VIEW")	
 	public String listDetail(PortletRequest request, Model model) {
 		KpiTypeForm kpiTypeForm = null;
 		if (!model.containsAttribute("kpiTypeForm")) {
@@ -86,16 +78,14 @@ public class KpiTypeController {
 			kpiTypeForm = (KpiTypeForm) model.asMap().get("kpiTypeForm");
 		}
 		KpiTypeModel kpiTypeModel = new KpiTypeModel();
-		String keySearch = kpiTypeForm.getKeySearch();
-		kpiTypeModel.setKeySearch(keySearch);
-
 		Paging page = new Paging(); //default pageNo = 1
 		kpiTypeModel.setPaging(page);
 		List<KpiTypeModel> types = service.searchKpiType(kpiTypeModel);
 		model.addAttribute("types", types);
 		model.addAttribute("lastPage", service.getResultPage());
 		model.addAttribute("PageCur", "1");
-		model.addAttribute("keyListStatus", "99");
+		model.addAttribute("keySearch","");
+		model.addAttribute("keyListStatus","99");
 		return "master/KpiType";
 	}
 
@@ -119,7 +109,7 @@ public class KpiTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
 		response.setRenderParameter("messageCode", rs.getMsgCode());
-		//Render to "VIEW"
+		response.setRenderParameter("keyListStatus", kpiTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doEdit")
@@ -143,6 +133,7 @@ public class KpiTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
 		response.setRenderParameter("messageCode", rs.getMsgCode());
+		response.setRenderParameter("keyListStatus", kpiTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doDelete")
@@ -172,6 +163,7 @@ public class KpiTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", messageCode);
 		response.setRenderParameter("messageDesc", messageDesc);
+		response.setRenderParameter("keyListStatus", kpiTypeForm.getKeyListStatus());
 	}
 
 	@RequestMapping(params = "action=doSearch")
@@ -179,21 +171,13 @@ public class KpiTypeController {
 			javax.portlet.ActionResponse response,
 			@ModelAttribute("kpiTypeForm") KpiTypeForm kpiTypeForm,
 			BindingResult result, Model model) {
-		/*
-		 * User user = (User) request.getAttribute(WebKeys.USER);
-		 * kpiTypeForm.getKpiTypeModel().setAcademicYear(sysYear); keySearch =
-		 * "aa"; KpiTypeModel kpiTypeModel =new KpiTypeModel ();
-		 * kpiTypeModel.setKeySearch(keySearch); List<KpiTypeModel> types =
-		 * service.searchKpiType(kpiTypeModel);
-		 * //model.addAttribute("types",types); //return n;
-		 */
-		String keySearch = kpiTypeForm.getKeySearch();
-		String pageSize = kpiTypeForm.getPageSize();
-		String kyeListStatus = kpiTypeForm.getKeyListStatus();
-		response.setRenderParameter("render", "listSearch");
-		response.setRenderParameter("keySearch", keySearch);
-		response.setRenderParameter("kyeListStatus", kyeListStatus);
-		response.setRenderParameter("pageSize", pageSize);
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("keySearch", kpiTypeForm.getKeySearch());
+		response.setRenderParameter("pageNoStr", kpiTypeForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", kpiTypeForm.getPageSize());
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("keyListStatus", kpiTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doListPage")
@@ -212,6 +196,7 @@ public class KpiTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", messageDesc);
 		response.setRenderParameter("messageCode", messageCode);
+		response.setRenderParameter("keyListStatus", kpiTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doPageSize")
@@ -227,26 +212,7 @@ public class KpiTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", "");
 		response.setRenderParameter("messageCode", "");
-	}
-
-	@RequestMapping("VIEW")
-	@RenderMapping(params = "render=listSearch")
-	public String RenderSearch(@RequestParam("keySearch") String keySearch,@RequestParam("kyeListStatus") String kyeListStatus,
-			@RequestParam("pageSize") int pageSize, Model model) {
-		KpiTypeModel kpiTypeModel = new KpiTypeModel();
-		kpiTypeModel.setKeySearch(keySearch);
-		kpiTypeModel.setActive(kyeListStatus);
-		Paging page = new Paging(); //default pageNo = 1
-		kpiTypeModel.setPaging(page);
-		kpiTypeModel.getPaging().setPageSize(pageSize);
-		List<KpiTypeModel> types = service.searchKpiType(kpiTypeModel);
-		model.addAttribute("types", types);
-		model.addAttribute("lastPage", service.getResultPage());
-		model.addAttribute("PageCur", 1);
-		model.addAttribute("pageSize", pageSize);
-		model.addAttribute("keySearch", keySearch);
-		model.addAttribute("keyListStatus", kyeListStatus);
-		return "master/KpiType";
+		response.setRenderParameter("keyListStatus", kpiTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping("VIEW")
@@ -255,13 +221,15 @@ public class KpiTypeController {
 			@RequestParam("pageNoStr") String pageNoStr,
 			@RequestParam("pageSize") int pageSize,
 			@RequestParam("messageDesc") String messageDesc,
-			@RequestParam("messageCode") String messageCode, 
+			@RequestParam("messageCode") String messageCode,
+			@RequestParam("keyListStatus") String keyListStatus,
 			Model model) {
 		KpiTypeModel kpiTypeModel = new KpiTypeModel();
 		kpiTypeModel.setKeySearch(keySearch);
 		Paging page = new Paging(Integer.parseInt(pageNoStr), 10, "ASC");
 		kpiTypeModel.setPaging(page);
 		kpiTypeModel.getPaging().setPageSize(pageSize);
+		kpiTypeModel.setActive(keyListStatus);
 		List<KpiTypeModel> types = service.searchKpiType(kpiTypeModel);
 		model.addAttribute("types", types);
 		model.addAttribute("lastPage", service.getResultPage());
@@ -270,7 +238,7 @@ public class KpiTypeController {
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("messageCode", messageCode);
 		model.addAttribute("messageDesc", messageDesc);
-		model.addAttribute("keyListStatus", "99");
+		model.addAttribute("keyListStatus", keyListStatus);
 		return "master/KpiType";
 	}
 	

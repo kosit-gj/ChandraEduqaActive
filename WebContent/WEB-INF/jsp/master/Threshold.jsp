@@ -54,10 +54,6 @@
     <script type="text/javascript"> 
    	  	var dialog,dialog2,gobalBenginTld,gobalEndTld,gobalTldName,gobalTldColor,gobalActive;
     	$( document ).ready(function() {
-    		/* paging();
-    		$('#numPage').val(${PageCur});
-    		$('#pageSize').val(${pageSize});
-    		$('div.paging button:contains('+ ${PageCur} +')').css({'color':'#009ae5','text-decoration':'underline','border':'0.5px solid #009ae5'}); */
     		pageMessage();
     		$('.inputNum').keypress(function (event) {                
                 return isNumber(event, this)
@@ -133,7 +129,9 @@
 	   	 	$.confirm({
 		   	     text: "ยืนยันการลบระดับตัวบ่งชี้ \"".concat(dataName, "\""),
 		   	     title: "ลบระดับตัวบ่งชี้",
-		   	     confirm: function(button) {		   	    	
+		   	     confirm: function(button) {
+		   	    	$("#keySearch").val($("#textSearch").val());
+			 		$("#keyListStatus").val($("#listStatus").val());
 		   	 		$('#thresholdForm').attr("action","<%=formActionDelete%>");
 			 		$('#thresholdForm '+'#fTldId').val(dataId);
 			 		$('#thresholdForm').submit();
@@ -165,7 +163,8 @@
 	   	   	 		).css( "display", "block" ).fadeOut( 15000 );
    	 			}else{
    	 				$("#fTldLevel").val(parseInt($("#textSearch").val()));
-   	 				$("#keyListStatus").val($("#listStatus").val());
+	   	 			$("#keySearch").val($("#textSearch").val());
+			 		$("#keyListStatus").val($("#listStatus").val());
 	   	 			$('#thresholdForm').attr('action',"<%=formActionInsert%>");  
 	   	 			$('#keySearch').val($("#textSearch").val()); // ??
 		   	 		$('#thresholdForm').submit();
@@ -174,17 +173,19 @@
    	 		}
    	 	}
    	 	function actSaveEdit(){
-	 	if($.trim(gobalBenginTld) == $.trim($("input#fBeginTld").val()) //ส่วนที่เพิ่ม
-	 		&& $.trim(gobalEndTld) == $.trim($("input#fEndTld").val())
-	 		&& $.trim(gobalTldName) == $.trim($("input#fTldName").val())
-	 		&& $.trim(gobalTldColor) == $.trim($("input#fTldColor").val())
-	 		&& $.trim(gobalActive) == $.trim($("input.active:checked").val())
-	 		){
-	 		actCancel();
-	 	
-	 	}else{ ///////
-   	 		$('#thresholdForm').attr("action","<%=formActionEdit%>");
-	 		$('#thresholdForm').submit();
+		 	if($.trim(gobalBenginTld) == $.trim($("input#fBeginTld").val()) //ส่วนที่เพิ่ม
+		 		&& $.trim(gobalEndTld) == $.trim($("input#fEndTld").val())
+		 		&& $.trim(gobalTldName) == $.trim($("input#fTldName").val())
+		 		&& $.trim(gobalTldColor) == $.trim($("input#fTldColor").val())
+		 		&& $.trim(gobalActive) == $.trim($("input.active:checked").val())
+		 		){
+		 		actCancel();
+		 	
+		 	}else{
+		 		$("#keySearch").val($("#textSearch").val());
+		 		$("#keyListStatus").val($("#listStatus").val());
+	   	 		$('#thresholdForm').attr("action","<%=formActionEdit%>");
+		 		$('#thresholdForm').submit();
 	 		}
    	 	}
 	 	
@@ -249,33 +250,7 @@
 		   	}else{
 		   		$(d1).slideToggle("slow");
 		   	} 
-   	 	} 
-   	 	<%-- function paging(){
-   	 		var totalPage = parseInt(${lastPage});
-   	 		for(var i=1;i<=totalPage;i++){
-   	 			$('#buttonPage').append($('<button class="btnPag" onClick="actSelectPage(this)">'+i+'</button>'));
-   	 		}
-   	 	}
-   	 	function goPrev(){
-        	if(${PageCur}!=1){
-        		var numPage = parseInt($('#numPage').val())-1;
-        		var sizePage = $('#pageSize').val();
-        		$('#thresholdForm '+'#pageNo').val(numPage);
-        		$('#thresholdForm '+'#PageSize').val(sizePage);
-        		$('#thresholdForm').attr("action","<%=formActionListPage%>");
-        		$('#thresholdForm').submit();
-        	}
-   	 	}
-        function goNext(){
-        	if(${PageCur} < ${lastPage}){
-        		var numPage = parseInt($('#numPage').val())+1;
-        		var sizePage = $('#pageSize').val();
-        		$('#thresholdForm '+'#pageNo').val(numPage);
-        		$('#thresholdForm '+'#PageSize').val(sizePage);
-        		$('#thresholdForm').attr("action","<%=formActionListPage%>");
-        		$('#thresholdForm').submit();
-        	}
-        } --%>        
+   	 	}        
         function isNumber(evt, element) {
 
             var charCode = (evt.which) ? evt.which : event.keyCode
@@ -439,7 +414,7 @@
 		<div class="row-fluid"><%--  firstLevel:${firstLevel} || keySearch:${keySearch } --%>
 			<div class="span6">
 				<span>เกณฑ์แสดงผลประเมินระดับ : </span>
-				<select id="textSearch" onchange="actSearch(this)">
+				<select id="textSearch" > <!-- onchange="actSearch(this)" -->
 					<c:forEach items="${levels}" var="level" varStatus="loop">	
 						<c:choose>					
 							<c:when test="${empty keySearch}"> <!-- กรณีเปิดครั้งแกรจะ Default ค่าตามที่ Controller สงมา -->														
@@ -493,35 +468,6 @@
        			 <img height="20" width="20" src="<c:url value="/resources/images/search.png"/>" onClick="actSearch(this)">
 				<img style="cursor: pointer;" height="18" width="18" onClick="actAdd(this)" src="<c:url value="/resources/images/add.png"/>">
 			</div>
-		
-		<!-- <div class="row-fluid" style="margin-top: 10px">	
-			<div class="paging span12" align="right">
-				<li style="display: inline-block;" onclick='goPrev()'>
-					<a style="cursor: pointer;"><u>&lt;&nbsp;</u></a>
-				</li>
-				<div class="buttonPage"> 
-					<button class="btnPag btnPagDummy" onClick="actSelectPage(this)"> 1 </button>
-				</div> 
-				<li style="display: inline-block;" onclick='goNext()'>
-					<a style="cursor: pointer;"><u>&nbsp;&gt;</u></a>
-				</li>
-				&nbsp&nbsp&nbsp&nbsp
-				<input type="hidden" id="numPage" style="width:60px"/>
-				<span>จำนวนแถว: </span> 
-				<select id="pageSize" onchange="actChangePageSize()">
-	    			<option>10</option>
-	    			<option>20</option>
-	    			<option>30</option>
-	    			<option>40</option>
-	    			<option>50</option>
-	  			</select>
-			</div>		
-		</div>  -->
-		
-	<!-- <div>
-			<span>ผลการประเมิน </span>
-				<img style="cursor: pointer;" height="18" width="18" onClick="actAdd(this)" src="<c:url value="/resources/images/add.png"/>">
-		</div> -->	
 		
 		<div class="boxTable">
 			<table class="formActTld">
@@ -585,7 +531,7 @@
 			</table>
 		</div>
 	</div>
-
+</div>
 </body>
 </html>	
    

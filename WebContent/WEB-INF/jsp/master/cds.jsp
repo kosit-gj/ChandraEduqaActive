@@ -18,7 +18,9 @@
 <portlet:actionURL var="formActionListPage">
 	<portlet:param name="action" value="doListPage"/>
 </portlet:actionURL> 
-<portlet:actionURL var="formActionPageSize"> <portlet:param name="action" value="doPageSize"/> </portlet:actionURL>
+<portlet:actionURL var="formActionPageSize"> 
+	<portlet:param name="action" value="doPageSize"/> 
+</portlet:actionURL>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -81,11 +83,15 @@
             }
     	}
 		function actAdd(el){
+			$("#keySearch").val($("#textSearch").val());
+			$("#KeyListStatus").val($("#listStatus").val());
    	 		$('#cdsForm').attr("action","<%=formActionNew%>");
 			$('#cdsForm').submit();
 	 	}
 	 	function actEdit(el){
 	 		var dataId = parseInt($(el).parent('td').parent('tr').children('td:nth-child(1)').html());
+	 		$("#keySearch").val($("#textSearch").val());
+			$("#KeyListStatus").val($("#listStatus").val());
 	 		$('#cdsForm #cdsId').val(dataId);
    	 		$('#cdsForm').attr("action","<%=formActionEdit%>");
 			$('#cdsForm').submit();
@@ -256,23 +262,22 @@
 				<form:input type="hidden" id="KeyListStatus" path="KeyListStatus" />
 			</form:form>
 		</div>
+		
 		<div class="row" style="margin-bottom:6px;">
 			<div id="dataSearch" class="span6">
-				<!-- class="boxHeader" -->
-				
-				<span>ค้นหาข้อมูลพื้นฐาน </span> <input type="text" id="textSearch"
-					placeholder="ค้นหาจากชื่อ" />
-				
-					<select name='listStatus' id='listStatus' class="listStatus">
+				<!-- class="boxHeader" -->				
+				<span>ค้นหาข้อมูลพื้นฐาน </span> 
+				<input type="text" id="textSearch" placeholder="ค้นหาจากชื่อ" value="${keySearch}"/>
+				<select name='listStatus' id='listStatus' class="listStatus">
 					<c:choose>
 						<c:when test="${keyListStatus=='0'}">
 						<option value='99'>ทั้งหมด</option>
 						<option value='1'>เปิดใช้งาน</option>
-						<option selected='selected' value='0'>เปิดใช้งาน</option>
+						<option selected='selected' value='0'>ปิดใช้งาน</option>
 					</c:when>
 					<c:when test="${keyListStatus=='1'}">
 						<option value='99'>ทั้งหมด</option>
-						<option selected='selected' value='1'>ปิดใช้งาน</option>
+						<option selected='selected' value='1'>เปิดใช้งาน</option>
 						<option value='0'>ปิดใช้งาน</option>
 					</c:when>
 					<c:otherwise>
@@ -282,18 +287,12 @@
 						<option value='0'>ปิดใช้งาน</option>
 					</c:otherwise>
 					</c:choose>
-					</select>
-					&nbsp;
-					<img height="20" width="20" src="<c:url value="/resources/images/search.png"/>" onClick="actSearch(this)"> &nbsp;
-					<img height="18" width="18" src="<c:url value="/resources/images/add.png"/>"  onClick="actAdd(this)">
+				</select>
+				&nbsp;
+				<img height="20" width="20" src="<c:url value="/resources/images/search.png"/>" onClick="actSearch(this)"> &nbsp;
+				<img height="18" width="18" src="<c:url value="/resources/images/add.png"/>"  onClick="actAdd(this)">
 			</div>
 
-			<%-- <div id="dataPaging" class="span6" align="right">
-	       			<input type="button" onclick="goPrev()" value="<<"/>
-	       			<ul id="pageList" class="pageList" style="display: inline-block; margin: 0px">
-	       			</ul>
-	       			<input type="button" onclick="goNext();" value=">>"/>
-	       		</div> --%>
 			<div class="paging span6" align="right">
 				<a onclick='goPrev()'
 					style="display: inline-block; cursor: pointer;"> &lt;&nbsp; </a>
@@ -357,15 +356,6 @@
 				</c:if>
 			</tbody>
 		</table>
-
-		<%-- <div class="row">
-	       		<div id="dataPagingBottom" class="span12" align="right">
-	       			<input type="button" onclick="goPrev()" value="<<"/>
-	       			<ul id="pageListBottom" class="pageList" style="display: inline-block; margin: 0px">
-	       			</ul>
-	       			<input type="button" onclick="goNext();" value=">>"/>
-	       		</div>
-       		</div> --%>
        		
 		<div class="row-fluid" style="margin-top: 10px">
 			<div class="paging span12" align="right">

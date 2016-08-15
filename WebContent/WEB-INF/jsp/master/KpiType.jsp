@@ -108,7 +108,9 @@
 	   	 	$.confirm({
 		   	     text: "ยืนยันการลบชนิดตัวบ่งชี้ \"".concat(dataName, "\""),
 		   	     title: "ลบชนิดตัวบ่งชี้",
-		   	     confirm: function(button) {		   	    	
+		   	     confirm: function(button) {
+		   	    	$('#keyListStatus').val($('#listStatus').val());
+	   	 			$("#keySearch").val($("#textSearch").val());
 		   	 		$('#kpiTypeForm').attr("action","<%=formActionDelete%>");
 			 		$('#kpiTypeForm '+'#fTypeId').val(dataId);
 			 		$('#kpiTypeForm').submit();
@@ -128,6 +130,8 @@
    	 		if($.trim($('#fTypeName').val()) == "" || $.trim($('#fTypeStName').val()) == ""){
    	 			$('label#ckInputText').css( "display", "block" ).fadeOut( 5000 );
    	 		}else{
+   	 			$('#keyListStatus').val($('#listStatus').val());
+	 			$("#keySearch").val($("#textSearch").val());
 	   	 		$('#kpiTypeForm').attr('action',"<%=formActionInsert%>");   	 		
 	   	 		$('#kpiTypeForm').submit();
 	   	 		$('#fTypeName, #fTypeStName').val("");
@@ -141,7 +145,9 @@
 	 		}else{
 	 			if($.trim(gobalTypeName) == currentTypeName && $.trim(gobalTypeStName) == currentTypeStName && $.trim(gobalActive) == $.trim($("input.active:checked").val())){
 	 				actCancel();
-	 			}else{	 				
+	 			}else{	 	
+	 				$('#keyListStatus').val($('#listStatus').val());
+	   	 			$("#keySearch").val($("#textSearch").val());
 			 		$('#kpiTypeForm').attr("action","<%=formActionEdit%>");
 			 		$('#kpiTypeForm').submit();
 	 			}
@@ -350,12 +356,10 @@
 		    			<option value='1'>เปิดใช้งาน</option>
 		    			<option selected='selected' value='0'>ปิดใช้งาน</option>
 				   </c:when>
-				   <c:when test="${keyListStatus=='1'}">
-				   
+				   <c:when test="${keyListStatus=='1'}">				   
 				   		<option value='99'>ทั้งหมด</option>
 		    			<option selected='selected' value='1'>เปิดใช้งาน</option>
-		    			<option value='0'>ปิดใช้งาน</option>
-		    			
+		    			<option value='0'>ปิดใช้งาน</option>		    			
 				   </c:when> 
 				   <c:otherwise>
 				   		<option selected='selected' value='99'>ทั้งหมด</option>

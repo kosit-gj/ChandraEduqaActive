@@ -112,7 +112,9 @@
 	   	 	$.confirm({
 		   	 	text: "ยืนยันการลบกลุ่มตัวบ่งชี้ \"".concat(dataName, "\""),
 		   	     title: "ลบกลุ่มตัวบ่งชี้",
-		   	     confirm: function(button) {		   	    	
+		   	     confirm: function(button) {
+		   	    	$('#keyListStatus').val($('#listStatus').val());
+	   	 			$("#keySearch").val($("#textSearch").val());
 		   	 		$('#kpiGroupForm').attr("action","<%=formActionDelete%>");
 			 		$('#kpiGroupForm '+'#fGroupId').val(dataId);
 			 		$('#kpiGroupForm').submit();
@@ -132,6 +134,8 @@
    	 		if($.trim($('#fGroupName').val()) == "" || $.trim($('#fGroupStName').val()) == ""){
    	 			$('label#ckInputText').css( "display", "block" ).fadeOut( 2000 );
    	 		}else{
+   	 			$('#keyListStatus').val($('#listStatus').val());
+	 			$("#keySearch").val($("#textSearch").val());
 	   	 		$('#kpiGroupForm').attr('action',"<%=formActionInsert%>");	 		
 	   	 		$('#kpiGroupForm').submit(); 
    	 		}
@@ -148,6 +152,8 @@
    	 			&& $.trim(globalOrgType) == $.trim(currentOrgType)){
    	 			actCancel();
    	 		}else{
+   	 			$('#keyListStatus').val($('#listStatus').val());
+	 			$("#keySearch").val($("#textSearch").val());
    	 			$('#kpiGroupForm').attr("action","<%=formActionEdit%>");
 	 			$('#kpiGroupForm').submit(); 
    	 		}	 		

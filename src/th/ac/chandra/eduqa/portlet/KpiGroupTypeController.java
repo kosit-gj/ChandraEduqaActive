@@ -1,10 +1,7 @@
 package th.ac.chandra.eduqa.portlet;
 
-//import java.sql.Date;
 import java.sql.Timestamp;
-//import java.text.DateFormat;
 import java.text.ParseException;
-///import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.portlet.PortletPreferences;
@@ -25,18 +22,16 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
+import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.model.User;
+
 import th.ac.chandra.eduqa.constant.ServiceConstant;
-import th.ac.chandra.eduqa.form.KpiGroupForm;
 import th.ac.chandra.eduqa.form.KpiGroupTypeForm;
-import th.ac.chandra.eduqa.mapper.CustomObjectMapper;
 import th.ac.chandra.eduqa.mapper.ResultService;
 import th.ac.chandra.eduqa.model.KpiGroupTypeModel;
 import th.ac.chandra.eduqa.model.SysYearModel;
 import th.ac.chandra.eduqa.service.EduqaService;
 import th.ac.chandra.eduqa.xstream.common.Paging;
-
-import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.User;
 
 @Controller("kpiGroupTypeController")
 @RequestMapping("VIEW")
@@ -47,9 +42,7 @@ public class KpiGroupTypeController {
 	@Autowired
 	@Qualifier("eduqaServiceWSImpl")
 	private EduqaService service;
-	
-	// ชั่วคราว	
-	//private Integer sysYear = 2558;
+
 	private Integer getCurrentYear(){
 		SysYearModel sysYearModel = new SysYearModel();
 		List<SysYearModel> sysYears = service.searchSysYear(sysYearModel);
@@ -60,9 +53,6 @@ public class KpiGroupTypeController {
 			return 9999;
 		}
 	}
-	
-	@Autowired
-	private CustomObjectMapper customObjectMapper;
 
 	@InitBinder
 	public void initBinder(PortletRequestDataBinder binder,
@@ -72,8 +62,8 @@ public class KpiGroupTypeController {
 				new ByteArrayMultipartFileEditor());
 	}
 
-	@RequestMapping("VIEW")
-	// first visit
+	// First visit //
+	@RequestMapping("VIEW")	
 	public String listDetail(PortletRequest request, Model model) {
 		KpiGroupTypeForm kpiGroupTypeForm = null;
 		if (!model.containsAttribute("kpiGroupTypeForm")) {
@@ -83,15 +73,14 @@ public class KpiGroupTypeController {
 			kpiGroupTypeForm = (KpiGroupTypeForm) model.asMap().get("kpiGroupTypeForm");
 		}
 		KpiGroupTypeModel kpiGroupTypeModel = new KpiGroupTypeModel();
-		String keySearch = kpiGroupTypeForm.getKeySearch();
-		kpiGroupTypeModel.setKeySearch(keySearch);
-
 		Paging page = new Paging(); //default pageNo = 1
 		kpiGroupTypeModel.setPaging(page);
 		List<KpiGroupTypeModel> groupTypes = service.searchKpiGroupType(kpiGroupTypeModel);
 		model.addAttribute("groupTypes", groupTypes);
 		model.addAttribute("lastPage", service.getResultPage());
 		model.addAttribute("PageCur", "1");
+		model.addAttribute("keySearch","");
+		model.addAttribute("keyListStatus","99");
 		return "master/KpiGroupType";
 	}
 
@@ -109,14 +98,13 @@ public class KpiGroupTypeController {
 		String pageNo = kpiGroupTypeForm.getPageNo().toString();
 		String pageSize = kpiGroupTypeForm.getPageSize();
 		String keySearch = kpiGroupTypeForm.getKeySearch();
-		//response.setRenderParameter("render", "actionList");
 		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("keySearch", keySearch);
 		response.setRenderParameter("pageNoStr", pageNo);
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", rs.getMsgCode());
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
-		//Render to "VIEW"
+		response.setRenderParameter("keyListStatus",kpiGroupTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doEdit")
@@ -131,10 +119,18 @@ public class KpiGroupTypeController {
 		Timestamp timestamp = Timestamp.valueOf(createStr);
 		kpiGroupTypeForm.getKpiGroupTypeModel().setCreatedDate(timestamp);
 		ResultService rs = service.updateKpiGroupType(kpiGroupTypeForm.getKpiGroupTypeModel());
-		response.setRenderParameter("render", "actionList");
-		response.setRenderParameter("keyListStatus",kpiGroupTypeForm.getKeyListStatus() );
+		
+		String pageNo = kpiGroupTypeForm.getPageNo().toString();
+		String pageSize = kpiGroupTypeForm.getPageSize();
+		String keySearch = kpiGroupTypeForm.getKeySearch();
+		
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("keySearch", keySearch);
+		response.setRenderParameter("pageNoStr", pageNo);
+		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", rs.getMsgCode());
 		response.setRenderParameter("messageDesc", rs.getMsgDesc());
+		response.setRenderParameter("keyListStatus",kpiGroupTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doDelete")
@@ -144,13 +140,10 @@ public class KpiGroupTypeController {
 			BindingResult result, Model model) {
 		User user = (User) request.getAttribute(WebKeys.USER);
 		KpiGroupTypeModel kpiGroupTypeModel = new KpiGroupTypeModel();
-		kpiGroupTypeModel.setGroupTypeId(kpiGroupTypeForm.getKpiGroupTypeModel().getGroupTypeId());		
-		//service.deleteKpiGroupType(kpiGroupTypeModel);
 		String messageDesc ="";
 		String messageCode ="";
 		int recoedCount=service.deleteKpiGroupType(kpiGroupTypeModel);
 		if(recoedCount == -9){
-			//model.addAttribute(ServiceConstant.ERROR_MESSAGE_KEY, ServiceConstant.ERROR_CONSTRAINT_VIOLATION_MESSAGE_CODE);
 			messageDesc = ServiceConstant.ERROR_CONSTRAINT_VIOLATION_MESSAGE_CODE;
 			messageCode = "0";
 		}
@@ -164,6 +157,7 @@ public class KpiGroupTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", messageCode);
 		response.setRenderParameter("messageDesc", messageDesc);
+		response.setRenderParameter("keyListStatus",kpiGroupTypeForm.getKeyListStatus());
 	}
 
 	@RequestMapping(params = "action=doSearch")
@@ -171,22 +165,13 @@ public class KpiGroupTypeController {
 			javax.portlet.ActionResponse response,
 			@ModelAttribute("kpiGroupTypeForm") KpiGroupTypeForm kpiGroupTypeForm,
 			BindingResult result, Model model) {
-		/*
-		 * User user = (User) request.getAttribute(WebKeys.USER);
-		 * kpiGroupTypeForm.getKpiGroupTypeModel().setAcademicYear(sysYear); keySearch =
-		 * "aa"; KpiGroupTypeModel kpiGroupTypeModel =new KpiGroupTypeModel ();
-		 * kpiGroupTypeModel.setKeySearch(keySearch); List<KpiGroupTypeModel> levels =
-		 * service.searchKpiGroupType(kpiGroupTypeModel);
-		 * //model.addAttribute("levels",levels); //return n;
-		 */
-		String keySearch = kpiGroupTypeForm.getKeySearch();
-		String pageSize = kpiGroupTypeForm.getPageSize();
-		String keyListStatus = kpiGroupTypeForm.getKeyListStatus();
-		System.out.println("1keyListStatus"+keyListStatus);
-		response.setRenderParameter("render", "listSearch");
-		response.setRenderParameter("keySearch", keySearch);
-		response.setRenderParameter("keyListStatus", keyListStatus);
-		response.setRenderParameter("pageSize", pageSize);
+		response.setRenderParameter("render", "listPage");
+		response.setRenderParameter("keySearch", kpiGroupTypeForm.getKeySearch());
+		response.setRenderParameter("pageNoStr", kpiGroupTypeForm.getPageNo().toString());
+		response.setRenderParameter("pageSize", kpiGroupTypeForm.getPageSize());
+		response.setRenderParameter("messageDesc", "");
+		response.setRenderParameter("messageCode", "");
+		response.setRenderParameter("keyListStatus",kpiGroupTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doListPage")
@@ -205,6 +190,7 @@ public class KpiGroupTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageDesc", messageDesc);
 		response.setRenderParameter("messageCode", messageCode);
+		response.setRenderParameter("keyListStatus",kpiGroupTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doPageSize")
@@ -220,26 +206,7 @@ public class KpiGroupTypeController {
 		response.setRenderParameter("pageSize", pageSize);
 		response.setRenderParameter("messageCode", "");
 		response.setRenderParameter("messageDesc", "");
-	}
-
-	@RequestMapping("VIEW")
-	@RenderMapping(params = "render=listSearch")
-	public String RenderSearch(@RequestParam("keySearch") String keySearch,@RequestParam("keyListStatus") String keyListStatus,
-			@RequestParam("pageSize") int pageSize, Model model) {
-		KpiGroupTypeModel kpiGroupTypeModel = new KpiGroupTypeModel();
-		kpiGroupTypeModel.setKeySearch(keySearch);
-		kpiGroupTypeModel.setActive(keyListStatus);
-		Paging page = new Paging(); //default pageNo = 1
-		kpiGroupTypeModel.setPaging(page);
-		kpiGroupTypeModel.getPaging().setPageSize(pageSize);
-		List<KpiGroupTypeModel> groupTypes = service.searchKpiGroupType(kpiGroupTypeModel);
-		model.addAttribute("groupTypes", groupTypes);
-		model.addAttribute("lastPage", service.getResultPage());
-		model.addAttribute("PageCur", 1);
-		model.addAttribute("pageSize", pageSize);
-		model.addAttribute("keySearch", keySearch);
-		model.addAttribute("keyListStatus", keyListStatus);
-		return "master/KpiGroupType";
+		response.setRenderParameter("keyListStatus",kpiGroupTypeForm.getKeyListStatus());
 	}
 	
 	@RequestMapping("VIEW")
@@ -249,10 +216,12 @@ public class KpiGroupTypeController {
 			@RequestParam("pageSize") int pageSize,
 			@RequestParam("messageCode") String messageCode, 
 			@RequestParam("messageDesc") String messageDesc,
+			@RequestParam("keyListStatus") String keyListStatus,
 			Model model) {
 		KpiGroupTypeModel kpiGroupTypeModel = new KpiGroupTypeModel();
 		kpiGroupTypeModel.setKeySearch(keySearch);
 		Paging page = new Paging(Integer.parseInt(pageNoStr), 10, "ASC");
+		kpiGroupTypeModel.setActive(keyListStatus);
 		kpiGroupTypeModel.setPaging(page);
 		kpiGroupTypeModel.getPaging().setPageSize(pageSize);
 		List<KpiGroupTypeModel> groupTypes = service.searchKpiGroupType(kpiGroupTypeModel);
@@ -263,37 +232,7 @@ public class KpiGroupTypeController {
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("messageCode", messageCode);
 		model.addAttribute("messageDesc", messageDesc);
-		model.addAttribute("keyListStatus", "99");
+		model.addAttribute("keyListStatus", keyListStatus);
 		return "master/KpiGroupType";
 	}
-	
-	@RequestMapping("VIEW")
-	@RenderMapping(params = "render=actionList")
-	public String RenderInsert(@RequestParam("messageCode") String messageCode, 
-			@RequestParam("messageDesc") String messageDesc, Model model) {
-		KpiGroupTypeModel kpiGroupTypeModel = new KpiGroupTypeModel();
-		Paging page = new Paging(); //default pageNo=1
-		kpiGroupTypeModel.setPaging(page);
-		kpiGroupTypeModel.getPaging().setPageSize(10);		
-		List<KpiGroupTypeModel> groupTypes = service.searchKpiGroupType(kpiGroupTypeModel);
-		model.addAttribute("groupTypes", groupTypes);
-		Integer lastPage = service.getResultPage();
-		model.addAttribute("lastPage", lastPage);
-		model.addAttribute("PageCur", 1);
-		model.addAttribute("messageCode", messageCode);
-		model.addAttribute("messageDesc", messageDesc);
-		model.addAttribute("keyListStatus", "99");
-		return "master/KpiGroupType";
-	}
-	/*
-	 * @ResourceMapping(value="getPlan")
-	 * 
-	 * @ResponseBody public void Echo(ResourceRequest request,ResourceResponse
-	 * response) throws IOException{ String id=request.getParameter("p1");
-	 * JSONObject json = JSONFactoryUtil.createJSONObject();
-	 * json.put("description",id);
-	 * 
-	 * System.out.println(json.toString());
-	 * response.getWriter().write(json.toString()); }
-	 */
 }
