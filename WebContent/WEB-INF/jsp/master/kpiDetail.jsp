@@ -1890,6 +1890,5 @@
 			</div>
 		</div>
 	</div>
-	Actvie:${active}
 </body>
 </html>

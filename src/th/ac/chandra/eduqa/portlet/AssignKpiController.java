@@ -111,7 +111,9 @@ public class AssignKpiController {
 		model.addAttribute("lastPage",service.getResultPage());
 		// list
 		Map<Integer,String> levelList = new HashMap<Integer,String>();
-		List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
+		KpiLevelModel kpiLevelModel = new KpiLevelModel();
+		kpiLevelModel.setActive(1);
+		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		for(KpiLevelModel level : levels){
 			levelList.put(level.getLevelId(),level.getDesc());
 		}
@@ -125,10 +127,6 @@ public class AssignKpiController {
 		model.addAttribute("uniList",uniList);
 		
 		Map<String,String> facList = new HashMap<String,String>();
-		/*List<DescriptionModel> facs = service.getFacultyAll(new DescriptionModel());
-		for(DescriptionModel fac : facs){
-			facList.put(fac.getDescCode(),fac.getDescription());
-		}*/
 		List<OrgModel> facs = service.getOrgFacultyOfUniversity(org);
 		for(OrgModel fac : facs){
 			facList.put(fac.getFacultyCode(),fac.getFacultyName());
@@ -201,7 +199,9 @@ public class AssignKpiController {
 		
 		// list from iniPage ชั่วคราว
 		Map<Integer,String> levelList = new HashMap<Integer,String>();
-		List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
+		KpiLevelModel kpiLevelModel = new KpiLevelModel();
+		kpiLevelModel.setActive(1);
+		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		for(KpiLevelModel level : levels){
 			levelList.put(level.getLevelId(),level.getDesc());
 		}
@@ -251,7 +251,7 @@ public class AssignKpiController {
 		response.setRenderParameter("render", "showList");
 		response.setRenderParameter("workOrgId",String.valueOf(assignTargetForm.getOrgId()) );
 	}
-	// kpiList 
+	// kpiList // 
 	@RequestMapping(params="action=doAssignTarget") 
 	public void actionDisplayTarget(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
 			@ModelAttribute("kpiListForm") KpiListForm kpiListForm,BindingResult result,Model model){

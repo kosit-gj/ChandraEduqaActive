@@ -60,18 +60,15 @@
    
    
     <script type="text/javascript"> 
-
       $( document ).ready(function() {
         pageMessage();        
         $("#accordionList").accordion({
           heightStyle: "content",
           collapsible: true
         });
-
         ToggleEnableSelection();
         renderParameterCtrl(getUserRoleLevelID());
       });
-
       function pageMessage(){
         if($("#messageMsg").val()){
           if($("#messageMsg").val() == 100){ //ok
@@ -89,7 +86,6 @@
           }
         }
       }
-
       function getUserRoleLevelID(){
         var userRoleLevel;
         $.ajax({ 
@@ -103,39 +99,33 @@
         });
         return userRoleLevel;
       }
-
       function renderParameterCtrl(userLevelId){
         var paramLevel = $('#paramLevel').val();
         var paramUniversity  =  $("#paramUniversity");
         var paramFaculty  =  $("#paramFaculty");
         var paramCourse = $("#paramCourse");
-
         //ตรวจสอบสิทธิ์ของผู้ใชงานและทำการส้ราง Parameter ตามสิทธิ์
         if(userLevelId == 1){
           if(paramLevel == 1){
             //Do not thing
-
           }else if(paramLevel == 2){
             //Generate paramFaculty and set defalut value
             ParamChange(paramUniversity, 'university');
             if(${currentFaculty} != 0){
               paramFaculty.val(${currentFaculty});
             }
-
           }else if(paramLevel == 3){
             //Generate paramFaculty and set defalut value
             ParamChange(paramUniversity, 'university');
             if(${currentFaculty} != 0){
               paramFaculty.val(${currentFaculty});
             }
-
             //Generate paramCoures and set defalut value
             ParamChange($('select#paramFaculty'), 'faculty');
             if(${currentCourse} != 0){
               paramCourse.val(${currentCourse});
             }
           }
-
         }else if(userLevelId == 2){ 
           $('select#paramLevel option[value=1]').prop("disabled", true);
           if(paramLevel == 2){
@@ -144,21 +134,18 @@
             if(${currentFaculty} != 0){
               paramFaculty.val(${currentFaculty});
             }
-
           }else if(paramLevel == 3){
             //Generate paramFaculty and set defalut value
             ParamChange(paramUniversity, 'university');
             if(${currentFaculty} != 0){
               paramFaculty.val(${currentFaculty});
             }
-
             //Generate paramCoures and set defalut value
             ParamChange($('select#paramFaculty'), 'faculty');
             if(${currentCourse} != 0){
               paramCourse.val(${currentCourse});
             }
           }
-
         }else if(userLevelId==3){
           $('select#paramLevel option[value=1]').prop("disabled", true);
           $('select#paramLevel option[value=2]').prop("disabled", true);         
@@ -171,7 +158,6 @@
                 facultyOpt = $("<option value=\""+data["facultyCourseList"][0]["facultyCode"]
                   +"\"></option>").html(data["facultyCourseList"][0]["facultyName"]);
                 paramFaculty.empty().append(facultyOpt);
-
                 //Generate paramCourse
                 courseOpt = $("<option value=\""+data["facultyCourseList"][0]["courseCode"]
                   +"\"></option>").html(data["facultyCourseList"][0]["courseName"]);
@@ -180,7 +166,6 @@
             });
         }
       }
-
       function ToggleEnableSelection(){
         var uni  =  $("#paramUniversity");
         var fac  =  $("#paramFaculty");
@@ -200,10 +185,8 @@
           cou.prop("disabled",false); 
         }
       }
-
       function ParamLevelChange(el){
         ToggleEnableSelection();
-
         var lv = $('#paramLevel').val();
         if(lv==1){
           $("#paramFaculty").val(0);
@@ -218,15 +201,12 @@
           ParamChange($('select#paramFaculty'), 'faculty');
         }
       }
-
       function ParamChange(el, changeType){
-
         var sups = ["university","faculty","course"];
         var value = $(el).val();
         var elUniversity  = $("#paramUniversity");
         var elFaculty  = $("#paramFaculty");
         var elCouse = $("#paramCourse");
-
         if(changeType == sups[0]){ // university change
           $.ajax({ 
             dataType:'json',
@@ -249,7 +229,6 @@
             //  alert(JSON.stringify(data));
               if($('#paramLevel').val() == "3"){
                 GenParamCourseList(elCouse,data["lists"]);
-
                 //Remove class redBorder if not null value    
                 if(elCouse.val() != null){
                   elCouse.removeClass("redBorder");
@@ -264,7 +243,6 @@
           }
         }
       } 
-
     function GenParamFacultyList(target,data){
       //  var target = $('#'+elFaculty);
         target.empty();
@@ -361,7 +339,6 @@
       var paramUniversity = $('select#paramUniversity');
       var paramFaculty = $('select#paramFaculty');
       var paramCourse = $('select#paramCourse');
-
       //ตรวจสอบค่าว่างของ parameter 
       if(paramLevel.val() == 3){
         if(paramCourse.val() != null){
@@ -374,11 +351,9 @@
         $('#kpiResultForm').attr("action","<%=doSubmitFilter%>");
         $('#kpiResultForm').submit();
       }
-
         //$('#kpiResultForm').attr("action","<%=doSubmitFilter%>");
       //$('#kpiResultForm').submit();
     }
-
     </script>
  
     <style type="text/css">
@@ -480,7 +455,6 @@
     .rectred{ background-color:#FF0000;}
     .rectgreen{ background-color:#00FF00;}
     #paramMain .boxFilter>span{ font-size:105%;display:inline-block; text-align:right;}
-
     .redBorder{
       border-color: #66afe9;
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(255, 44, 44, 0.7);
@@ -624,4 +598,3 @@
   
 </body>
 </html> 
-   
