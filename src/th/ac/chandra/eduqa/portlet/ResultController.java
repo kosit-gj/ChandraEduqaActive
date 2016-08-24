@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -24,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.formula.functions.Replace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -90,21 +92,26 @@ public class ResultController {
 	private String getUploadDirectory() throws UnsupportedEncodingException {
 		String path = this.getClass().getClassLoader().getResource("").getPath();
 		String fullPath = URLDecoder.decode(path, "UTF-8");
-		String delimitor;
+		String[] pathArr = fullPath.split("/temp/");
+		String delimitor, pathArrAct;
+		 
 		if (SystemUtils.IS_OS_LINUX) {
 			delimitor = "/";
+			pathArrAct = pathArr[0];
 		} else if (SystemUtils.IS_OS_WINDOWS) {
-			delimitor = "\\";
+			delimitor = "\\\\";
+			pathArrAct = pathArr[0].substring(1).replaceAll("/", "\\\\\\\\");;
 		} else {
 			delimitor = "-??-";
+			pathArrAct = pathArr[0];
 		}
-		String pathArr[] = fullPath.split(delimitor + "temp" + delimitor);
-		
-		File file = new File(pathArr[0] +delimitor+"webapps"+delimitor+"Super-Kpi-Image"+delimitor);
+		File file = new File(pathArrAct+delimitor+"webapps"+delimitor+"Super-Kpi-Image"+delimitor);
 		if (!file.exists()) {
 			file.mkdir();
 		}
-		return pathArr[0] +delimitor+"webapps"+delimitor+"Super-Kpi-Image"+delimitor;
+
+		return pathArrAct+delimitor+"webapps"+delimitor+"Super-Kpi-Image"+delimitor;
+	
 	}
 
 	private Integer tempGroupOptValue = 0;
@@ -634,16 +641,16 @@ public class ResultController {
 						}
 					}
 					// copy file to server //
+					String fileNameUtf8 = URLDecoder.decode(form.getFileData().getOriginalFilename(), "UTF-8");
 					FileCopyUtils.copy(form.getFileData().getBytes(), new File(getUploadDirectory()
-							+ user.getScreenName() + directoryDelimitor + form.getFileData().getOriginalFilename()));
+							+ user.getScreenName() + directoryDelimitor + fileNameUtf8));
+				
 					
-					
-					evidenceModel.setEvidencePath(form.getFileData().getOriginalFilename());
-					evidenceModel.setEvidenceUrlPath("http://"+request.getServerName()+":"+request.getServerPort()+"/Super-Kpi-Image/"+user.getScreenName()+"/"+form.getFileData().getOriginalFilename());
-					//evidenceModel.setEvidenceUrlPath(getUploadDirectory()+user.getScreenName()+directoryDelimitor+form.getFileData().getOriginalFilename());
 					// Save Evidence //
+					evidenceModel.setEvidencePath(form.getFileData().getOriginalFilename());
+					evidenceModel.setEvidenceUrlPath("http://"+request.getServerName()+":"+request.getServerPort()+"/Super-Kpi-Image/"+user.getScreenName()+"/"+fileNameUtf8);
 					Integer evidenceId = service.saveCdsEvidence(evidenceModel); 
-					if (evidenceId <= 0) {
+					if (evidenceId >= 0) {
 						errorMessages.add("บึกทึกหลักฐานไม่สำเร็จ");
 					}
 				} catch (Exception e) {
@@ -1086,19 +1093,21 @@ public class ResultController {
 					File file = new File(getUploadDirectory() + user.getScreenName());
 					if (!file.exists()) {
 						if (file.mkdir()) {
-							// errorMessages.add("สร้าง folder สำเร็จ");
+							errorMessages.add("สร้าง folder สำเร็จ");
 						} else {
-							// errorMessages.add("สร้าง folder ไม่สำเร็จ");
+							errorMessages.add("สร้าง folder ไม่สำเร็จ");
 						}
 					}
-					// copy file to server
+					// Copy file to server //
+					String fileNameUtf8 = URLDecoder.decode(form.getFileData().getOriginalFilename(), "UTF-8");
 					FileCopyUtils.copy(form.getFileData().getBytes(), new File(getUploadDirectory()
-							+ user.getScreenName() + directoryDelimitor + form.getFileData().getOriginalFilename()));
-					evidenceModel.setEvidenceUrlPath("http://"+request.getServerName()+":"+request.getServerPort()+"/Super-Kpi-Image/"+user.getScreenName()+"/"+form.getFileData().getOriginalFilename());
+							+ user.getScreenName() + directoryDelimitor + fileNameUtf8));
+					
+					// Save evidence //
+					evidenceModel.setEvidenceUrlPath("http://"+request.getServerName()+":"+request.getServerPort()+"/Super-Kpi-Image/"+user.getScreenName()+"/"+fileNameUtf8);
 					evidenceModel.setEvidencePath(form.getFileData().getOriginalFilename());
-					Integer evidenceId = service.saveKpiEvidence(evidenceModel); // save
-																					// Evidence
-					if (evidenceId <= 0) {
+					Integer evidenceId = service.saveKpiEvidence(evidenceModel);
+					if (evidenceId >= 0) {
 						errorMessages.add("บึกทึกหลักฐานไม่สำเร็จ");
 					}
 				} catch (Exception e) {

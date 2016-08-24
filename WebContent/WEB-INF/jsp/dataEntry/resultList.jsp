@@ -566,14 +566,14 @@
                         <td style="display:none">${kpiResult.kpiId}</td>
                         <td style="display:none">${kpiResult.criteriaTypeId}</td>
                         <td class="column-center">
-                          <c:choose>
-                      <c:when test="${kpiResult.hasResult=='1'}">
-                        <span class="rectgreen" >&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                      </c:when>    
-                      <c:otherwise>
-                        <span class="rectred" >&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                      </c:otherwise>
-                  </c:choose>
+                        <c:choose>
+                        	<c:when test="${kpiResult.hasResult=='1'}">
+                        		<span class="rectgreen" >&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        	</c:when>
+                        	<c:otherwise>
+                        		<span class="rectred" >&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        	</c:otherwise>
+                        </c:choose>
                         </td>
                         <td>${chandraFn:nl2br(kpiResult.kpiGroupName)}</td>  
                         <td>${chandraFn:nl2br(kpiResult.kpiName)}</td>  
