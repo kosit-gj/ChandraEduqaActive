@@ -140,6 +140,7 @@ public class KpiGroupTypeController {
 			BindingResult result, Model model) {
 		User user = (User) request.getAttribute(WebKeys.USER);
 		KpiGroupTypeModel kpiGroupTypeModel = new KpiGroupTypeModel();
+		kpiGroupTypeModel.setGroupTypeId(kpiGroupTypeForm.getKpiGroupTypeModel().getGroupTypeId());
 		String messageDesc ="";
 		String messageCode ="";
 		int recoedCount=service.deleteKpiGroupType(kpiGroupTypeModel);

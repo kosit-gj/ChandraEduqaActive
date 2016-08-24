@@ -58,7 +58,6 @@ import th.ac.chandra.eduqa.form.ResultQualityForm;
 import th.ac.chandra.eduqa.form.ResultQualityTable;
 import th.ac.chandra.eduqa.form.ResultQuantityForm;
 import th.ac.chandra.eduqa.form.ResultQuantityTable;
-import th.ac.chandra.eduqa.mapper.CustomObjectMapper;
 import th.ac.chandra.eduqa.mapper.ResultService;
 import th.ac.chandra.eduqa.model.CdsEvidenceModel;
 import th.ac.chandra.eduqa.model.CdsModel;
@@ -100,17 +99,13 @@ public class ResultController {
 			delimitor = "-??-";
 		}
 		String pathArr[] = fullPath.split(delimitor + "temp" + delimitor);
-		System.out.println("\n -- getUploadDirectory() --> "+pathArr[0] + delimitor+"Super-Kpi-Image"+"\n");
-
+		
+		File file = new File(pathArr[0] +delimitor+"webapps"+delimitor+"Super-Kpi-Image"+delimitor);
+		if (!file.exists()) {
+			file.mkdir();
+		}
 		return pathArr[0] +delimitor+"webapps"+delimitor+"Super-Kpi-Image"+delimitor;
-		//return "/home/kosit/file-uploadkosit/";
 	}
-	// private String uploadDirectory = "/home/pwirun/app/Chandra/fileupload/";
-	// private String uploadDirectory = "C:\\Users\\Administrator\\My
-	// Servers\\QIS\\FileServer\\fileupload";
-
-	@Autowired
-	private CustomObjectMapper customObjectMapper;
 
 	private Integer tempGroupOptValue = 0;
 
@@ -130,11 +125,10 @@ public class ResultController {
 
 	@RenderMapping
 	public String initPage(PortletRequest request, Model model) {
-		// ini Param
+		// Initial Parameter //
 		String UserOrgId = "1";
 		Integer monthId = 0;
 		Integer groupId = null;
-		// initial param
 		SysYearModel sy = service.getSysYear();
 		if (request.getParameter("month") != null) {
 			monthId = Integer.parseInt(request.getParameter("month"));
@@ -151,10 +145,10 @@ public class ResultController {
 			userOrg = service.getOrgOfUser(userOrg);
 			UserOrgId = userOrg.getDescCode();
 		}
-		// retrive SysMonth
+		// Retrieve SysMonth //
 		SysMonthModel CurrentCalendar = service.findSysMonthById(monthId);
-		// retrive org
-
+		
+		// Retrieve Org //
 		OrgModel org = new OrgModel();
 		org.setOrgId(Integer.parseInt(UserOrgId));
 		org = service.findOrgById(org);
@@ -165,7 +159,7 @@ public class ResultController {
 		HieAuth.setFaculty(org.getFacultyCode());
 		HieAuth.setCourse(org.getCourseCode());
 
-		// creae filter list
+		// Create filter list //
 		SysMonthModel monthM = new SysMonthModel();
 		monthM.setAcademicYear(sy.getAppraisalAcademicYear());
 		Map<String, String> yearList = new LinkedHashMap<String, String>();
@@ -185,6 +179,7 @@ public class ResultController {
 
 		Map<Integer, String> groups = new HashMap<Integer, String>();
 		KpiGroupModel groupM = new KpiGroupModel();
+		groupM.setActive("1");
 		List<KpiGroupModel> resultGroups = service.searchKpiGroup(groupM);
 		for (KpiGroupModel group : resultGroups) {
 			groups.put(group.getGroupId(), group.getGroupShortName());
@@ -192,7 +187,9 @@ public class ResultController {
 		model.addAttribute("groups", groups);
 
 		Map<Integer, String> levelList = new HashMap<Integer, String>();
-		List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
+		KpiLevelModel kpiLevelModel = new KpiLevelModel();
+		kpiLevelModel.setActive(1);
+		List<KpiLevelModel> levels = service.searchKpiLevel(kpiLevelModel);
 		for (KpiLevelModel level : levels) {
 			levelList.put(level.getLevelId(), level.getDesc());
 		}
@@ -206,11 +203,6 @@ public class ResultController {
 		model.addAttribute("universitys", uniList);
 
 		Map<String, String> facList = new HashMap<String, String>();
-		/*
-		 * List<DescriptionModel> facs = service.getFacultyAll(new
-		 * DescriptionModel()); for(DescriptionModel fac : facs){
-		 * facList.put(fac.getDescCode(),fac.getDescription()); }
-		 */
 		List<OrgModel> facs = service.getOrgFacultyOfUniversity(org);
 		for (OrgModel fac : facs) {
 			facList.put(fac.getFacultyCode(), fac.getFacultyName());
@@ -224,11 +216,11 @@ public class ResultController {
 		}
 		model.addAttribute("courses", corsList);
 
-		// retrive kpiResultList
+		// Retrieve kpiResultList //
 		KpiResultModel kpiResultModel = new KpiResultModel();
 		kpiResultModel.setOrgId(org.getOrgId());
 		kpiResultModel.setMonthID(monthId);
-		kpiResultModel.setAcademicYear(CurrentCalendar.getAcademicYear());
+		kpiResultModel.setAcademicYear(CurrentCalendar.getCalendarYear());
 		kpiResultModel.setKpiGroupId(groupId);
 		Paging page = new Paging();
 		page.setPageNo(1);
@@ -237,7 +229,7 @@ public class ResultController {
 		List<KpiResultModel> kpiResult = service.searchKpiResult(kpiResultModel);
 		List<KpiResultListForm> resultLists = convertAccordion(kpiResult);
 
-		// form
+		// Set value in kpiResultForm //
 		KpiResultForm kpiResultForm = null;
 		if (!model.containsAttribute("kpiResultForm")) {
 			// initial value
@@ -296,7 +288,7 @@ public class ResultController {
 			}
 			quanTableList.add(quanTable);
 		}
-		// bind form
+		// Bind form //
 		ResultQuantityForm form = new ResultQuantityForm();
 		form.setKpiId(kpiResult.getKpiId());
 		form.setKpiName(kpiResult.getKpiName());
@@ -322,14 +314,14 @@ public class ResultController {
 	@RequestMapping("VIEW")
 	@RenderMapping(params = "render=assignResultQuantity")
 	public String quantityRenderAssignResult(PortletRequest request, Model model) {
-		// get parameter
+		// Get parameter //
 		Integer orgId = Integer.parseInt(request.getParameter("orgId"));
 		Integer kpiId = Integer.parseInt(request.getParameter("kpiId"));
 		Integer monthId = Integer.parseInt(request.getParameter("monthId"));
 		Integer cdsId = Integer.parseInt(request.getParameter("cdsId"));
 		String resultMessage = request.getParameter("resultMessage");
 
-		// ########## render Result quantity list table
+		// Render result quantity list table //
 		KpiResultModel sendModel = new KpiResultModel();
 		sendModel.setOrgId(orgId);
 		sendModel.setKpiId(kpiId);
@@ -351,7 +343,7 @@ public class ResultController {
 			}
 			quanTableList.add(quanTable);
 		}
-		// bind form
+		// Bind form //
 		ResultQuantityForm form = new ResultQuantityForm();
 		form.setKpiId(kpiResult.getKpiId());
 		form.setKpiName(kpiResult.getKpiName());
@@ -361,14 +353,13 @@ public class ResultController {
 		form.setOrgId(orgId);
 		form.setMonthId(monthId);
 		model.addAttribute("resultQuantityForm", form);
-		// ########### end copy
+		// End copy //
 
 		AssignResultQuantityForm resultForm = new AssignResultQuantityForm();
 		resultForm.setKpiName(kpiResult.getKpiName());
 		resultForm.setOrgId(orgId);
 		resultForm.setKpiId(kpiId);
 		resultForm.setMonthId(monthId);
-		// CdsModel detailCds = service.findCdsById(cdsId); // get Cds Detail
 		ResultService rs = service.findCdsById(cdsId);
 		CdsModel detailCds = (CdsModel) rs.getResultObj();
 		resultForm.setCdsName(detailCds.getCdsName());
@@ -377,8 +368,9 @@ public class ResultController {
 		cdsResult.setCdsId(cdsId);
 		cdsResult.setOrgId(orgId);
 		cdsResult.setMonthId(monthId);
-		cdsResult = service.findCdsResultByCds(cdsResult); // get Result if
-															// exist
+		cdsResult = service.findCdsResultByCds(cdsResult); 
+		
+		// Get Result if exist //
 		if (cdsResult.getCdsValue() != null) {
 			resultForm.setCdsValue(Double.parseDouble(cdsResult.getCdsValue()));
 		}
@@ -626,31 +618,31 @@ public class ResultController {
 			evidenceModel.setUpdatedBy(user.getScreenName());
 			if (form.getEvidenceType().equals("L")) {
 				evidenceModel.setEvidencePath(form.getUrlPath());
-				Integer evidenceId = service.saveCdsEvidence(evidenceModel); // save
-																			// Evidence
+				Integer evidenceId = service.saveCdsEvidence(evidenceModel); 
 				if (evidenceId <= 0) {
 					errorMessages.add("บันทึกหลักฐานไม่สำเร็จ");
 				}
 			} else if (form.getEvidenceType().equals("F")) {
 				try {
 					// create directory
-					File file = new File(getUploadDirectory() + user.getScreenName());
+					File file = new File(getUploadDirectory()+ user.getScreenName());
 					if (!file.exists()) {
 						if (file.mkdir()) {
-							// errorMessages.add("สร้าง folder สำเร็จ");
+							errorMessages.add("สร้าง folder สำเร็จ");
 						} else {
-							// errorMessages.add("สร้าง folder ไม่สำเร็จ");
+							errorMessages.add("สร้าง folder ไม่สำเร็จ");
 						}
 					}
-					// copy file to server
+					// copy file to server //
 					FileCopyUtils.copy(form.getFileData().getBytes(), new File(getUploadDirectory()
 							+ user.getScreenName() + directoryDelimitor + form.getFileData().getOriginalFilename()));
 					
 					
 					evidenceModel.setEvidencePath(form.getFileData().getOriginalFilename());
-					evidenceModel.setEvidenceUrlPath("http://localhost:8080/Super-Kpi-Image/");
-					Integer evidenceId = service.saveCdsEvidence(evidenceModel); // save
-																				// Evidence
+					evidenceModel.setEvidenceUrlPath("http://"+request.getServerName()+":"+request.getServerPort()+"/Super-Kpi-Image/"+user.getScreenName()+"/"+form.getFileData().getOriginalFilename());
+					//evidenceModel.setEvidenceUrlPath(getUploadDirectory()+user.getScreenName()+directoryDelimitor+form.getFileData().getOriginalFilename());
+					// Save Evidence //
+					Integer evidenceId = service.saveCdsEvidence(evidenceModel); 
 					if (evidenceId <= 0) {
 						errorMessages.add("บึกทึกหลักฐานไม่สำเร็จ");
 					}
@@ -1029,11 +1021,12 @@ public class ResultController {
 			String path = PortalUtil.getCurrentURL(request);
 			int inx = path.indexOf("?");
 			word = path.substring(0, inx)
-					+ "?p_p_id=Result_WAR_ChandraEduqa&p_p_lifecycle=2&p_p_resource_id=fileDownload&filename=";
+					+ "?p_p_id=Result_WAR_ChandraEduqaActive&p_p_lifecycle=2&p_p_resource_id=fileDownload&filename=";
 		}
 		for (KpiEvidenceModel evs : evidencesResult) {
 			evs.setEvidenceFileName(evs.getEvidencePath());
 			evs.setEvidencePath(word + evs.getEvidencePath()); // renew
+			evs.setEvidenceUrlPath(evs.getEvidenceUrlPath());
 			evidences.add(evs);
 		}
 		eviQua.setEvidences(evidences);
@@ -1067,10 +1060,7 @@ public class ResultController {
 		resultDetail.setEvidenceFlag(form.getEvidenceType());
 		resultDetail.setCreatedBy(user.getScreenName());
 		resultDetail.setUpdatedBy(user.getScreenName());
-		Integer success = service.updateKpiResultDetailEvidence(resultDetail); // save
-																				// kpi
-																				// result
-																				// detail
+		Integer success = service.updateKpiResultDetailEvidence(resultDetail);
 
 		if (success == null || success <= 0) {
 			errorMessages.add("บันทึกประเภทหลักฐานไม่สำเร็จ");
@@ -1098,13 +1088,13 @@ public class ResultController {
 						if (file.mkdir()) {
 							// errorMessages.add("สร้าง folder สำเร็จ");
 						} else {
-							 errorMessages.add("สร้าง folder ไม่สำเร็จ");
+							// errorMessages.add("สร้าง folder ไม่สำเร็จ");
 						}
 					}
 					// copy file to server
 					FileCopyUtils.copy(form.getFileData().getBytes(), new File(getUploadDirectory()
 							+ user.getScreenName() + directoryDelimitor + form.getFileData().getOriginalFilename()));
-					
+					evidenceModel.setEvidenceUrlPath("http://"+request.getServerName()+":"+request.getServerPort()+"/Super-Kpi-Image/"+user.getScreenName()+"/"+form.getFileData().getOriginalFilename());
 					evidenceModel.setEvidencePath(form.getFileData().getOriginalFilename());
 					Integer evidenceId = service.saveKpiEvidence(evidenceModel); // save
 																					// Evidence

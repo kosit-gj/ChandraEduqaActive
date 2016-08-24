@@ -231,8 +231,8 @@ public class KpiStrucController {
 		response.setRenderParameter("messageCode", "");
 		response.setRenderParameter("messageDesc", "");
 		response.setRenderParameter("groupId", kpiStrucForm.getKpiStrucModel().getGroupId().toString());
-		response.setRenderParameter("keySearch", kpiStrucForm.getKeySearch());
-		response.setRenderParameter("keyListStatus", kpiStrucForm.getKeyListStatus());
+		response.setRenderParameter("keySearch", (kpiStrucForm.getKeySearch() == null ? "" : kpiStrucForm.getKeySearch()));
+		response.setRenderParameter("keyListStatus", (kpiStrucForm.getKeyListStatus() == null ? "": kpiStrucForm.getKeyListStatus()));
 	}
 	
 	@RequestMapping(params = "action=doPageSize")
@@ -241,13 +241,12 @@ public class KpiStrucController {
 			@ModelAttribute("kpiStrucForm") KpiStrucForm kpiStrucForm,
 			BindingResult result, Model model) {
 		response.setRenderParameter("render", "listPage");		
-		response.setRenderParameter("pageNoStr", kpiStrucForm.getPageNo().toString()); 
+		response.setRenderParameter("pageNoStr", "1"); 
 		response.setRenderParameter("pageSize", kpiStrucForm.getPageSize());
 		response.setRenderParameter("messageCode", "");
 		response.setRenderParameter("messageDesc", "");
 		response.setRenderParameter("groupId", kpiStrucForm.getKpiStrucModel().getGroupId().toString());
-		response.setRenderParameter("keySearch", kpiStrucForm.getKeySearch());
-		response.setRenderParameter("keyListStatus", kpiStrucForm.getKeyListStatus());
+		response.setRenderParameter("keySearch", (kpiStrucForm.getKeySearch() == null ? "" : kpiStrucForm.getKeySearch()));
+		response.setRenderParameter("keyListStatus", (kpiStrucForm.getKeyListStatus() == null ? "": kpiStrucForm.getKeyListStatus()));
 	}
-
 }

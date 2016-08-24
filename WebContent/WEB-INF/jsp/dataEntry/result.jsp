@@ -427,10 +427,10 @@
 				          			<td>
 				          			<c:choose>
 				          				<c:when test="${evidenceQuantityForm.evidenceType=='F'}">
-				          					<a href="${evidence.evidencePath}">${evidence.evidenceFileName}</a>
+				          					<a href="${evidence.evidenceUrlPath}" target="_blank">${evidence.evidenceFileName}</a>
 				          				</c:when>
 				          				<c:when test="${evidenceQuantityForm.evidenceType=='L'}">
-				          					<a href="${evidence.evidencePath}">${evidence.evidenceFileName}</a>
+				          					<a href="${evidence.evidencePath}" target="_blank">${evidence.evidenceFileName}</a>
 				          				</c:when>
 				          				<c:otherwise>
 				          					${evidence.evidencePath}

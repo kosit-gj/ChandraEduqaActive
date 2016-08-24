@@ -43,6 +43,7 @@
     	$( document ).ready(function() {
     		$("#kpi_accordion").accordion({ autoHeight: false });
     		togglePageMessage();
+    		$("#listStatus").val(${keyListStatus});
    	  	});
     	/* bind element event*/
     	function togglePageMessage(){
@@ -67,7 +68,6 @@
    	 		$('#kpiListForm #kpiId').val(dataId);
 	   	 	$('#kpiListForm').attr("action","<%=formActionEdit%>");
 			$('#kpiListForm').submit();
-   	 		
    	 	}
    	 	function actDelete(el){
    	 		var dataId = $(el).parent('td').parent('tr').children('td:nth-child(1)').html();
@@ -95,7 +95,7 @@
 	 		$('#kpiListForm').submit();
    	 	}
    	</script>  
-   	<style type="text/css">
+	<style type="text/css">
    		/* (1)+5 td*/
    		#kpiList table.datagrid td:nth-child(1),#kpiList table.datagrid th:nth-child(1){
    			display:none
@@ -122,16 +122,12 @@
 			border: thin solid #CDCDCD;
 		}
 
-  select.listStatus{
-    width:100px;
-    /*height:30px;*/
-
-    vertical-align: middle;
-    margin-bottom: 7px;
-  }
-
-
-   	</style>
+	  select.listStatus{
+	    width:100px;
+	    vertical-align: middle;
+	    margin-bottom: 7px;
+	  }
+	</style>
   </head>
   <body>
        	<div id="kpiList" class="box">
@@ -143,13 +139,12 @@
        			<span>ระดับตัวบ่งชี้</span>
        			<form:select path="level" onchange="actFilter()" items="${levels}"/> 
        			<span>ค้นหาตัวบ่งชี้</span>
-       			<form:input type="text" id="keySearch" placeholder="ค้นหาจากชื่อ" path="keySearch"/>
+       			<form:input type="text" id="keySearch" value="${keySearch}" placeholder="ค้นหาจากชื่อ" path="keySearch"/>
 	            <form:select name='listStatus' id='listStatus' class="listStatus" path="keyListStatus">
 		            <option selected='selected' value='99'>ทั้งหมด</option>
 		            <option value='1'>เปิดใช้งาน</option> 
 		            <option value='0'>ปิดใช้งาน</option>
 	            </form:select>
-
        			<img height="20" width="20" onClick="actFilter()"  src="<c:url value="/resources/images/search.png"/>">
        			<img height="18" width="18" onClick="actAdd(this)" src="<c:url value="/resources/images/add.png"/>">
        		</form:form>

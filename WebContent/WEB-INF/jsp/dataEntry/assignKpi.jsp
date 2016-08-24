@@ -441,12 +441,6 @@
 	<!-- Input สำหรับเก็บ kpi_result id เดิมที่มีอยู่ใน database -->
 	<input type="hidden" id="cbxBaseVal" value=""></input> <br/>
 
-	<%-- Debug information 
-	userDetail: ${userDetail} <br/>
-	currentFaculty: ${currentFaculty} <br/>
-	currentCourse: ${currentCourse} <br/> 
-	--%>
-
 	<div id="assignKpiList" class="box bg" style="-top:50px;">
 		<div id="assignKpi_filter" class="boxHeader">
 			<form:form id="hierarchyAuthorityForm"
@@ -477,6 +471,7 @@
 				<input type="button" value="เรียกดู" onclick="submitFilter()" class="btn btn-primary" style="margin-bottom: 10px;" />
 			</form:form>
 		</div>
+	</div>
 		
 		<form:form id="kpiListForm" modelAttribute="kpiListForm" method="post"
 			name="kpiListForm" action="${formActionNew}"

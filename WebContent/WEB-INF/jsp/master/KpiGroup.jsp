@@ -177,6 +177,13 @@
 	 			event='actSaveEdit()';
 	 			$(d1).find('select#fOrgType').val(valDesc["orgId"]);
 	   			$(d1).find('select#fGroupType').val(valDesc["groupType"]);
+	   			if(valDesc["active"] == 1){
+	   				$(d1).find('input[type=radio]#fActive').prop("checked", true);
+	   				$(d1).find('input[type=radio]#fNotActive').prop("checked", false);
+	   			}else{
+	   				$(d1).find('input[type=radio]#fActive').prop("checked", false);
+	   				$(d1).find('input[type=radio]#fNotActive').prop("checked", true);
+	   			}   
 	 		}
 	 		globalGroupName = valDesc["name"]; 
 	   		globalGroupStName = valDesc["shortName"];
@@ -189,7 +196,7 @@
    	 		$(d1).find('input[type=hidden]#fGroupCreateBy').val(valDesc["createBy"]);
    			$(d1).find('input[type=hidden]#fGroupCreateDate').val(valDesc["createDate"]);
    			$(d1).find('input[type=text]#fGroupName').val(valDesc["name"]);
-   			$(d1).find('input[type=text]#fGroupStName').val(valDesc["shortName"]);
+   			$(d1).find('input[type=text]#fGroupStName').val(valDesc["shortName"]);   						
    			
    			$(d1).find('button.save').attr('onClick',event);
 

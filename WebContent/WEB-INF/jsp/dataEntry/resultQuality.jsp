@@ -110,11 +110,6 @@
       function resultSave(){
         $("#assignResultQualityForm").attr("action","<%=doSaveResultQuality%>");
         $("#assignResultQualityForm").submit();
-        /* if($('#cdmCdsValue').text().trim() != ""){
-          $("#assignResultQualityForm").submit();
-        }else{
-          $('#resultDetailMessage').html('ไม่ใส่ผลดำเนินงาน');
-        } */
       }
       function resultBack(){
         $("#assignResultQualityForm").attr("action","<%=doResultQualityBackToList%>");
@@ -130,12 +125,11 @@
               $("#evidenceMessage").html("ยังไม่ได้ระบุ URL");
             }else if($('input[name="evidenceType"]:checked').val()=="F" && $("#attachFile").val()==""){
               $("#evidenceMessage").html("ยังไม่ได้ระบุไฟล์");
-            }else{
-            	
+            }else{           	
             	
             	//start check file exist by kosit
 	    		$.ajax({
-	    			url:"/ChandraEduqa/Model/mCheckUningeImage.jsp",
+	    			url:"/ChandraEduqaActive/Model/mCheckUningeImage.jsp",
 	    			type:"get",
 	    			dataType:"json",
 	    			data:{"paramImageName":$("input[name='fileData']").val(),"paramScreenName":"<%= user.getScreenName() %>"},
@@ -150,13 +144,10 @@
 	    					$("#evidenceQualityForm").attr("action","<%=doSaveEvidence%>");
 							$("#evidenceQualityForm").submit();
 							//alert("submit");
-
 	    				}
 	    			}
 	    		});
 	    		//end check file exist by kosit
-	    		
-              
             }
           }
         }else{
@@ -457,40 +448,6 @@
     </fieldset>
   </div>
   </form:form>
-
-  <!-- หน้านี้ถูกตัดออกเพราะความไม่สะดวกของผู้ใช้งาน โดยจะไปเรียกใช้งาน doSaveAutoSaveResult() แทน-->
-  <!-- <c:if test="${not empty assignResultQualityForm}"> 
-  <div id="cdsDetailModal" style="min-height:200px;width:80%;border:1px solid #bcbcbc;padding:10px 10px 10px 10px" >
-    <form:form  id="assignResultQualityForm" modelAttribute="assignResultQualityForm" method="post"  name="assignResultQualityForm" action="${doAddResult}" enctype="multipart/form-data">
-      <form:input type="hidden" id="detailKpiId" path="kpiId" />
-        <form:input type="hidden" id="detailOrgId" path="orgId" />
-        <form:input type="hidden" id="detailCdsId" path="cdsId"/>
-        <form:input type="hidden" id="detailMonthId" path="monthId"/>
-        <form:input type="hidden" id="detailCriteriaId" path="criteriaId"/> 
-    ชื่อตัวบ่งชี้: <span id="cdmKpiName">${assignResultQualityForm.kpiName}</span> <br/>
-    <span id="resultDetailMessage" class="responseMessage">${assignResultQualityForm.message}</span>
-      <fieldset>
-        <legend class="legends"> รายงานผล </legend>
-        <div> <form:checkbox path="actionFlag"/> <span id="cdmCdsName">${assignResultQualityForm.criteriaDesc}</span> </div>
-      </fieldset>
-      <c:if test="${not empty assignResultQualityForm.cdsId }">
-      <fieldset>
-        <legend class="legends"> ข้อมูลพื้นฐาน </legend>
-        <span id="cdmCdsName">${assignResultQualityForm.cdsName}</span> 
-        <br/>
-        <span id="cdmDate">${assignResultQualityForm.yearName} ${assignResultQualityForm.yearNo}</span>
-        <span>เดือน ${assignResultQualityForm.monthName} :</span>
-        <form:input id="cdmCdsValue" type="text" path="cdsValue" class="numbersOnly" disabled="true" /> 
-      </fieldset>
-      </c:if>
-      <br/> 
-      <div style="width:100%; text-align:center; padding-top: 5px">
-        <input type="button" id="resultSavebtn" class="save"  value="บันทึก" onclick="resultSave()" />
-        <input type="button" id="resultCancelbtn" class="cancel" value="ยกเลิก" onclick="resultBack()" />
-      </div>
-    </form:form>
-  </div>
-  </c:if> -->
   
   <c:if test="${not empty evidenceQualityForm}"> 
   
@@ -548,10 +505,10 @@
                         <td>
                         <c:choose>
                           <c:when test="${evidenceQualityForm.evidenceType=='F'}">
-                            <a href="${evidence.evidencePath}">${evidence.evidenceFileName}</a>
+                            <a href="${evidence.evidenceUrlPath}" target="_blank">${evidence.evidenceFileName}</a>
                           </c:when>
                           <c:when test="${evidenceQualityForm.evidenceType=='L'}">
-                            <a href="${evidence.evidencePath}">${evidence.evidenceFileName}</a>
+                            <a href="${evidence.evidencePath}" target="_blank">${evidence.evidenceFileName}</a>
                           </c:when>
                           <c:otherwise>
                             ${evidence.evidencePath}

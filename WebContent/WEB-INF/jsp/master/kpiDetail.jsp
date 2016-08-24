@@ -127,6 +127,11 @@
 	       	}
 	     
 	       	getCriteraiMethod();
+	       	
+	        // เอา kpi ที่เหมือนกับ kpi ที่กำลังดำเนินงานออก //
+	        if($("#kpiId").val().length != 0){
+	        	$('#detailParent option[value='+$("#kpiId").val()+']').css("display", "none");
+	        }       	
 	    });
 
 	    function pageMessage(){
@@ -866,8 +871,7 @@
     	function deleteQuan(current){
     		var cnt = $(current).closest("table");
     		var baselineId = cnt.find("tr:nth-child(1)").find("td:nth-child(2)").html();
-    		var baselineName = "test";
-    		if(confirm('ยินยันการลบ "'+baselineName+'"')){
+    		if(confirm('ยินยันการลบ')){
 	    		$.ajax({
 	    			dataType:'json',
 	    			url: "<%=doDeleteBaseline%>" ,
@@ -1549,6 +1553,8 @@
 		<div id="kpi-Detail" class="boxPadding">
 			<form:form id="kpiFormDetail" modelAttribute="kpiForm" method="post" name="kpiForm" action="${formActionNew}" enctype="multipart/form-data">
 				<form:input type="text" id="kpiId" path="kpiModel.kpiId" style="display:none" />
+				<form:input type="hidden" id="keySearch" path="keySearch" />
+				<form:input type="hidden" id="keyListStatus" path="keyListStatus" />
 				<table class="tableKpiDetail">
 					<tr>
 						<td colspan="2"><label>ชื่อตัวบ่งชี้</label>
@@ -1560,14 +1566,14 @@
 							<form:select id="detailLevel" path="kpiModel.levelId" items="${levelList}" class="Required"/>
 						</td>
 						<td>
-							<label>องค์ประกอบ</label> 
-							<form:select id="detailStructure" path="kpiModel.structureId" items="${structureList}" class="input-xlarge Required"/>
-						</td>
+							<label>กลุ่มตัวบ่งชี้</label>
+							<form:select id="detailGroup" class="input-xlarge Required" path="kpiModel.groupId" items="${groupList}" onchange="getSuperKpi()"/>
+						</td>						
 					</tr>
 					<tr>
 						<td>
-							<label>กลุ่มตัวบ่งชี้</label>
-							<form:select id="detailGroup" class="input-xlarge Required" path="kpiModel.groupId" items="${groupList}" onchange="getSuperKpi()"/>
+							<label>องค์ประกอบ</label> 
+							<form:select id="detailStructure" path="kpiModel.structureId" items="${structureList}" class="input-xlarge Required"/>
 						</td>
 						<td>
 							<label>ชนิดตัวบ่งชี้</label>
@@ -1590,8 +1596,8 @@
 							<form:select id="detailUom" path="kpiModel.uomId" items="${uomList}" class="Required"/>
 						</td>
 						<td>
-							<label>ภายใต้ตัวบ่งชี้</label> 
-							<form:select id="detailParent" class="input-xlarge" path="kpiModel.parentId" items="${parentList}" /> 
+							<label>ภายใต้ตัวบ่งชี้</label>
+							<form:select id="detailParent" class="input-xlarge" path="kpiModel.parentId" items="${parentList}" />													
 							<img height="24" width="24"	style="cursor: pointer" src="<c:url value="/resources/images/refresh-rect-bw.png"/>" onclick="getKpiParentList()" /> 
 							<img height="24" width="24" style="display: none;" src="<c:url value="/resources/images/loading_blue_32.gif"/>" />
 						</td>	
@@ -1629,8 +1635,7 @@
 							&nbsp
 							<form:radiobutton id="radioCriteriaScore2" name="radioCriteriaScore" path="radioCriteriaScore" value="pass" /> 
 							ผ่าน/ไม่ผ่าน
-						</td>
-						
+						</td>						
 					</tr>
 					<tr>
 						<td>
@@ -1638,8 +1643,6 @@
 							<form:select id="criteriaMethod" class="input-large Required" onchange="toggleBaselineLayout()" path="kpiModel.criteriaMethodId" items="${criteriaMethodList}" />
 						</td>
 					</tr>
-					
-
 					<tr style="display: none;">
 						<td><form:input type="text" path="kpiModel.createdBy" /></td>
 					</tr>

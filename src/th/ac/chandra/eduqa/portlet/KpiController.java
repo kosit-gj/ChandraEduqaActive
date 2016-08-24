@@ -40,7 +40,6 @@ import com.liferay.portal.util.PortalUtil;
 
 import th.ac.chandra.eduqa.form.KpiForm;
 import th.ac.chandra.eduqa.form.KpiListForm;
-import th.ac.chandra.eduqa.mapper.CustomObjectMapper;
 import th.ac.chandra.eduqa.mapper.ResultService;
 import th.ac.chandra.eduqa.model.BaselineModel;
 import th.ac.chandra.eduqa.model.CdsModel;
@@ -76,11 +75,7 @@ public class KpiController {
 			return 9999;
 		}
 	}
-	
-	@Autowired
-	private CustomObjectMapper customObjectMapper;
 
-	private String msg = "start";
 	@InitBinder
 	public void initBinder(PortletRequestDataBinder binder, PortletPreferences preferences) {
 		logger.debug("initBinder");
@@ -132,7 +127,10 @@ public class KpiController {
 			@ModelAttribute("kpiListForm") KpiListForm kpiListForm,BindingResult result,Model model){
 		response.setRenderParameter("render", "showDetail");
 		response.setRenderParameter("actionStatus", "newkpi");
+		response.setRenderParameter("keySearch", kpiListForm.getKeySearch());
+		response.setRenderParameter("keyListStatus", kpiListForm.getKeyListStatus());
 	}
+	
 	@RequestMapping(params="action=doEdit") 
 	public void editDetail(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
 			@ModelAttribute("kpiListForm") KpiListForm kpiListForm,BindingResult result,Model model){
@@ -140,10 +138,17 @@ public class KpiController {
 		response.setRenderParameter("render", "showDetail");
 		response.setRenderParameter("kpiId",String.valueOf( kpiListForm.getKpiId()) );
 		response.setRenderParameter("actionStatus", "editKpi");
+		response.setRenderParameter("keySearch", kpiListForm.getKeySearch());
+		response.setRenderParameter("keyListStatus", kpiListForm.getKeyListStatus());
 	}
+	
 	@RequestMapping("VIEW")
 	@RenderMapping(params="render=showDetail")
-	public String showDetail(PortletRequest request,Model model, @RequestParam("actionStatus") String actionStatus){
+	public String showDetail(PortletRequest request,
+			@RequestParam("actionStatus") String actionStatus,
+			@RequestParam("keySearch") String keySearch,
+			@RequestParam("keyListStatus") String keyListStatus,
+			Model model){
 		model.addAttribute("actionMessage",request.getParameter("message"));
 		model.addAttribute("actionMessageCode",request.getParameter("messageCode"));
 			
@@ -232,10 +237,6 @@ public class KpiController {
 		for(DescriptionModel crMethod: crMthods){
 			criteriaMethodList.put(crMethod.getDescCode(),crMethod.getDescription());
 		}
-		//criteriaMethodList.put(1,"แปลงค่าจากสูตร");
-		//criteriaMethodList.put(2,"ใช้ผลลัพท์จากสูตร");
-		//criteriaMethodList.put(3,"เกณฑ์มาตราฐาน");
-		//criteriaMethodList.put(4,"เกณฑ์มาตราฐานแยกข้อ");
 		model.addAttribute("criteriaMethodList",criteriaMethodList);
 		// criteria group
 		Map<Integer,String> criteriaGroupList = new HashMap<Integer,String>();
@@ -250,7 +251,7 @@ public class KpiController {
 		criteriaGroupDetailList.put(1,"รวม");
 		model.addAttribute("criteriaGroupDetailList", criteriaGroupDetailList);
 		//kpiForm
-		KpiForm kpiForm=null;
+		KpiForm kpiForm = null;
 		if (!model.containsAttribute("kpiForm")) {
 			kpiForm = new KpiForm();
 			//model.addAttribute("kpiForm",	kpiForm);
@@ -269,6 +270,8 @@ public class KpiController {
 			}else{
 				kpiForm.setRadioCriteriaScore("integer");
 			}
+			kpiForm.setKeySearch(keySearch);
+			kpiForm.setKeyListStatus(keyListStatus);
 			model.addAttribute("active",kpi.getActive());
 			model.addAttribute("kpiForm",kpiForm);
 		}
@@ -277,6 +280,8 @@ public class KpiController {
 			kpiM.setCriteriaScore(5);
 			kpiForm.setRadioCriteriaScore("integer");
 			kpiForm.setKpiModel(kpiM);
+			kpiForm.setKeySearch(keySearch);
+			kpiForm.setKeyListStatus(keyListStatus);
 			model.addAttribute("kpiForm",kpiForm);
 		}
 		model.addAttribute("actionStatus", actionStatus);
@@ -290,6 +295,10 @@ public class KpiController {
 			KpiModel kpi = new KpiModel();
 			kpi.setKpiId(kpiListForm.getKpiId());
 			service.deleteKpi(kpi);
+			response.setRenderParameter("render", "listSearch");
+			response.setRenderParameter("keySearch", kpiListForm.getKeySearch());
+			response.setRenderParameter("keyListStatus", kpiListForm.getKeyListStatus());
+			response.setRenderParameter("level", String.valueOf(kpiListForm.getLevel()));
 			response.setRenderParameter("pageMessage", validParamString(service.getResultMessage()));
 	}
 	@RequestMapping(params = "action=doFilter") 
@@ -300,11 +309,13 @@ public class KpiController {
 		response.setRenderParameter("keyListStatus", kpiListForm.getKeyListStatus());
 		response.setRenderParameter("level", String.valueOf(kpiListForm.getLevel()));
 	}
+	
 	@RequestMapping("VIEW")
 	@RenderMapping(params = "render=listSearch")
-	public String RenderKeySearch(@RequestParam("keySearch") String keySearch
-			,@RequestParam("level") String levelId,Model model,@RequestParam("keyListStatus") String keyListStatus){
-			//00000 เพิ่ม Render Parameter ใส่ส่วนของ keyListStatus แล้ว SetActive ตาม Parameter ที่ได้รับ
+	public String RenderKeySearch(@RequestParam("keySearch") String keySearch,
+			@RequestParam("level") String levelId,
+			@RequestParam("keyListStatus") String keyListStatus,
+			Model model){
 			Map<Integer,String> levelList = new HashMap<Integer,String>();
 			List<KpiLevelModel> levels = service.searchKpiLevel(new KpiLevelModel());
 			for(KpiLevelModel level: levels){
@@ -329,6 +340,9 @@ public class KpiController {
 			List<KpiListForm> lists = convertAccordion(kpis);
 			model.addAttribute("accordions",lists);
 			model.addAttribute("lastPage",service.getResultPage());
+			model.addAttribute("keySearch",keySearch);
+			model.addAttribute("keyListStatus",keyListStatus);
+			
 			return "master/kpi";
 	}
 
@@ -372,6 +386,8 @@ public class KpiController {
 		response.setRenderParameter("message", message);
 		response.setRenderParameter("messageCode", messageCode);
 		response.setRenderParameter("actionStatus", "editKpi");
+		response.setRenderParameter("keySearch", kpiForm.getKeySearch());
+		response.setRenderParameter("keyListStatus", kpiForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doUpdateKpi") 
@@ -399,13 +415,19 @@ public class KpiController {
 		response.setRenderParameter("message", "บันทึกสำเร็จ");
 		response.setRenderParameter("messageCode", "0");
 		response.setRenderParameter("actionStatus", "editKpi");
+		response.setRenderParameter("keySearch", kpiForm.getKeySearch());
+		response.setRenderParameter("keyListStatus", kpiForm.getKeyListStatus());
 	}
 	
 	@RequestMapping(params = "action=doBack2List") 
 	public void back2List(javax.portlet.ActionRequest request, javax.portlet.ActionResponse response,
-			@ModelAttribute("kpiForm") KpiForm kpiForm,BindingResult result,Model model) { 
-			User user = (User) request.getAttribute(WebKeys.USER);
+			@ModelAttribute("kpiForm") KpiForm kpiForm,BindingResult result,Model model) {
+			response.setRenderParameter("render", "listSearch");
+			response.setRenderParameter("keySearch", kpiForm.getKeySearch());
+			response.setRenderParameter("keyListStatus", kpiForm.getKeyListStatus());
+			response.setRenderParameter("level", String.valueOf(kpiForm.getKpiModel().getLevelId()));
 	}
+	
 	/* #####  function */
 	private List<KpiListForm> convertAccordion(List<KpiModel> kpis){
 		ListIterator<KpiModel> kpisIter = kpis.listIterator();

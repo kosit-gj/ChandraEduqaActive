@@ -146,7 +146,8 @@ public class CdsController {
 		response.setRenderParameter("render", "listPage");
 		response.setRenderParameter("messageCode", "");
 		response.setRenderParameter("messageDesc", "");
-		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		//response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
+		response.setRenderParameter("pageNoStr", "1");
 		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
 		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
 		response.setRenderParameter("keySearch", cdsForm.getKeySearch());
@@ -317,7 +318,8 @@ public class CdsController {
 		cdsModel.setKeySearch(keySearch);
 		cdsModel.setActive(keyListStatus);
 		Paging page = new Paging();
-		page.setPageNo(1);
+		page.setPageNo(Integer.parseInt(pageNoStr));
+		page.setPageSize(Integer.parseInt(pageSize));
 		cdsModel.setPaging(page);
 		ResultService rs = service.searchCds(cdsModel);
 		List<CdsModel> cdsList = (List<CdsModel>) rs.getResultObjList();
@@ -366,7 +368,7 @@ public class CdsController {
 		response.setRenderParameter("render", "backToList");
 		response.setRenderParameter("messageCode", "");
 		response.setRenderParameter("messageDesc", "");
-		response.setRenderParameter("pageNoStr", "1");
+		response.setRenderParameter("pageNoStr", cdsForm.getPageNo().toString());
 		response.setRenderParameter("pageSize", cdsForm.getPageSize());		
 		response.setRenderParameter("keyListStatus", cdsForm.getKeyListStatus());		
 		response.setRenderParameter("keySearch", cdsForm.getKeySearch());

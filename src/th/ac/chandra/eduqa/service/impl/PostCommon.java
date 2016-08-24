@@ -24,7 +24,7 @@ public class PostCommon {
 	public static final int PAGE_SIZE = 5; 
 	public ImakeResultMessage  postMessage(ImakeXML vserviceXML,String className,String endPoint,boolean isReturn) {
 	   // HttpPost httppost = new HttpPost(ServiceConstant.hostReference+endPoint); 
-		HttpPost httppost = new HttpPost("http://localhost:8081/ChandraEduqaService/rest/"+endPoint);
+		HttpPost httppost = new HttpPost("http://localhost:8081/ChandraEduqaServiceActive/rest/"+endPoint);
 	   XStream xstream = new XStream(new Dom4JDriver());
 		Class c  = null;
 		try {

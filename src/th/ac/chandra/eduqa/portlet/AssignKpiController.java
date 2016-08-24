@@ -347,11 +347,7 @@ public class AssignKpiController {
 			KpiModel.setKeySearch(request.getParameter("keySearch"));
 			Paging page = new Paging();  // default pageNo = 1
 			KpiModel.setPaging(page);
-			// convert Model -> form 
-		//	List<KpiModel> kpis = service.searchKpi(KpiModel);
-		//	List<KpiListForm> lists = convertAccordion(kpis);
-	//		model.addAttribute("accordions",lists);
-	//		model.addAttribute("lastPage",service.getResultPage());
+
 			return "dataEntry/assignKpi";
 	}
 	// detail request

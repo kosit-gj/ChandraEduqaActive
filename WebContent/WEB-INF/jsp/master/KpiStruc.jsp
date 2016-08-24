@@ -96,6 +96,7 @@
     	function actChangePageSize(el){
     		var numPage = $('.numPage').val();
     		var sizePage = $(el).val();
+    		$("#fGroupId").val($("#filterGroup").val());
     		$('#kpiStrucForm '+'#pageNo').val(numPage);
     		$('#kpiStrucForm '+'#PageSize').val(sizePage);
     		$('#kpiStrucForm').attr("action","<%=formActionPageSize%>");
@@ -104,6 +105,7 @@
    	 	function actSelectPage(el){
    	 		var numPage = el.innerHTML;
    	 		var sizePage = $('.pageSize').val();
+   	 		$("#fGroupId").val($("#filterGroup").val());
 	   	 	$('#kpiStrucForm '+'#pageNo').val(numPage);	   	 	
 	   	 	$('#kpiStrucForm '+'#PageSize').val(sizePage);
 			$('#kpiStrucForm').attr("action","<%=formActionListPage%>");
